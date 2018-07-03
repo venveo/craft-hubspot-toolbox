@@ -130,13 +130,18 @@ class HubSpotFormField extends Field
         foreach($forms as $form) {
             $hubspotForms[$form->id] = $form->formName;
         }
+        $siteFormId = null;
+        if (isset($value['siteFormId']))
+        {
+            $siteFormId = $value['siteFormId'];
+        }
         // Render the input template
         return Craft::$app->getView()->renderTemplate(
             'hubspot-toolbox/_components/fields/HubSpotForm_input',
             [
                 'id' => $this->id,
                 'name' => $this->handle,
-                'value' => $value,
+                'siteFormId' => $siteFormId,
                 'hubspotForms' => $hubspotForms
             ]
         );
