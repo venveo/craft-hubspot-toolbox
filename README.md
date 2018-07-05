@@ -1,34 +1,37 @@
 # HubSpot Toolbox plugin for Craft CMS 3.x
 
-Turnkey HubSpot integration for CraftCMS
-
-![Screenshot](resources/img/plugin-logo.png)
-
-## Requirements
-
-This plugin requires Craft CMS 3.0.0-beta.23 or later.
-
 ## Installation
 
-To install the plugin, follow these instructions.
-
-1. Open your terminal and go to your Craft project:
-
-        cd /path/to/project
-
-2. Then tell Composer to load the plugin:
-
-        composer require venveo/hub-spot-toolbox
+        composer require venveo/hubspot-toolbox
 
 3. In the Control Panel, go to Settings → Plugins and click the “Install” button for HubSpot Toolbox.
 
 ## HubSpot Toolbox Overview
 
--Insert text here-
-
 ## Configuring HubSpot Toolbox
+1. Copy the default config file to your config folder as `hubspot-toolbox.php`
+2. Create an app in your HubSpot developer console with the proper scopes.
+3. Add the HUBSPOT_PORTAL_ID env value to your `.env`
+4. Configure your app within the hubspot-toolbox.php config file:
+```php
+<?php
+return  [
+    'hubspotPortalId' => getenv('HUBSPOT_PORTAL_ID'),
+    'defaultApp' => 'some_unique_id',
 
--Insert text here-
+    'apps' => [
+        'some_unique_id' => [
+            'appName' => 'a name for my app',
+            'appId' => 000000,
+            'clientId' => 'probably_put_this_in_your_env',
+            'clientSecret' => 'probably_put_this_in_your_env',
+            // Update me
+            'scopes' => ['timeline', 'contacts', 'forms']
+        ]
+    ]
+];
+```
+
 
 ## Using HubSpot Toolbox
 
