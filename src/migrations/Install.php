@@ -97,7 +97,7 @@ class Install extends Migration
     {
         $tablesCreated = false;
 
-    // hubspottoolbox_hubspotformrecord table
+        // hubspottoolbox_hubspotformrecord table
         $tableSchema = Craft::$app->db->schema->getTableSchema('{{%hubspottoolbox_hubspotformrecord}}');
         if ($tableSchema === null) {
             $tablesCreated = true;
@@ -108,10 +108,30 @@ class Install extends Migration
                     'dateCreated' => $this->dateTime()->notNull(),
                     'dateUpdated' => $this->dateTime()->notNull(),
                     'uid' => $this->uid(),
-                // Custom columns in the table
+                    // Custom columns in the table
                     'siteId' => $this->integer()->notNull(),
                     'formId' => $this->string(255)->notNull(),
                     'formName' => $this->string(255)->notNull(),
+                ]
+            );
+        }
+
+        $tableSchema = Craft::$app->db->schema->getTableSchema('{{%hubspottoolbox_accesstoken}}');
+        if ($tableSchema === null) {
+            $tablesCreated = true;
+            $this->createTable(
+                '{{%hubspottoolbox_accesstoken}}',
+                [
+                    'id' => $this->primaryKey(),
+                    'dateCreated' => $this->dateTime()->notNull(),
+                    'dateUpdated' => $this->dateTime()->notNull(),
+                    'uid' => $this->uid(),
+                    'accessToken' => $this->string(300),
+                    'refreshToken' => $this->string(300),
+                    'expires' => $this->integer(),
+                    'appHandle' => $this->string()->notNull(),
+                    'createdBy' => $this->integer(),
+                    'siteId' => $this->integer()->notNull()
                 ]
             );
         }
@@ -126,7 +146,7 @@ class Install extends Migration
      */
     protected function createIndexes()
     {
-    // hubspottoolbox_hubspotformrecord table
+        // hubspottoolbox_hubspotformrecord table
         $this->createIndex(
             $this->db->getIndexName(
                 '{{%hubspottoolbox_hubspotformrecord}}',
@@ -135,6 +155,16 @@ class Install extends Migration
             ),
             '{{%hubspottoolbox_hubspotformrecord}}',
             'formId',
+            true
+        );
+        $this->createIndex(
+            $this->db->getIndexName(
+                '{{%hubspottoolbox_accesstoken}}',
+                'appHandle',
+                true
+            ),
+            '{{%hubspottoolbox_accesstoken}}',
+            'appHandle',
             true
         );
         // Additional commands depending on the db driver
@@ -153,7 +183,7 @@ class Install extends Migration
      */
     protected function addForeignKeys()
     {
-    // hubspottoolbox_hubspotformrecord table
+        // hubspottoolbox_hubspotformrecord table
         $this->addForeignKey(
             $this->db->getForeignKeyName('{{%hubspottoolbox_hubspotformrecord}}', 'siteId'),
             '{{%hubspottoolbox_hubspotformrecord}}',
@@ -161,6 +191,27 @@ class Install extends Migration
             '{{%sites}}',
             'id',
             'CASCADE',
+            'CASCADE'
+        );
+
+        $this->addForeignKey(
+            $this->db->getForeignKeyName('{{%hubspottoolbox_accesstoken}}', 'siteId'),
+            '{{%hubspottoolbox_accesstoken}}',
+            'siteId',
+            '{{%sites}}',
+            'id',
+            'CASCADE',
+            'CASCADE'
+        );
+
+        // test_test table
+        $this->addForeignKey(
+            $this->db->getForeignKeyName('{{%hubspottoolbox_accesstoken}}', 'createdBy'),
+            '{{%hubspottoolbox_accesstoken}}',
+            'createdBy',
+            '{{%users}}',
+            'id',
+            'SET NULL',
             'CASCADE'
         );
     }
@@ -181,7 +232,8 @@ class Install extends Migration
      */
     protected function removeTables()
     {
-    // hubspottoolbox_hubspotformrecord table
+        // hubspottoolbox_hubspotformrecord table
         $this->dropTableIfExists('{{%hubspottoolbox_hubspotformrecord}}');
+        $this->dropTableIfExists('{{%hubspottoolbox_accesstoken}}');
     }
 }
