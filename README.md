@@ -13,25 +13,26 @@
 2. Create an app in your HubSpot developer console with the proper scopes.
 3. Add the HUBSPOT_PORTAL_ID env value to your `.env`
 4. Configure your app within the hubspot-toolbox.php config file:
-```php
-<?php
-return  [
-    'hubspotPortalId' => getenv('HUBSPOT_PORTAL_ID'),
-    'defaultApp' => 'some_unique_id',
-
-    'apps' => [
-        'some_unique_id' => [
-            'appName' => 'a name for my app',
-            'appId' => 000000,
-            'clientId' => 'probably_put_this_in_your_env',
-            'clientSecret' => 'probably_put_this_in_your_env',
-            // Update me
-            'scopes' => ['timeline', 'contacts', 'forms']
+    ```php
+    <?php
+    return  [
+        'hubspotPortalId' => getenv('HUBSPOT_PORTAL_ID'),
+        'defaultApp' => 'some_unique_id',
+    
+        'apps' => [
+            'some_unique_id' => [
+                'appName' => 'a name for my app',
+                'appId' => 000000,
+                'clientId' => 'probably_put_this_in_your_env',
+                'clientSecret' => 'probably_put_this_in_your_env',
+                // Update me
+                'scopes' => ['timeline', 'contacts', 'forms']
+            ]
         ]
-    ]
-];
-```
-
+    ];
+    ```
+5. Enable plugin
+6. Go to plugin settings, click the login button!
 
 ## Using HubSpot Toolbox
 
