@@ -16,7 +16,6 @@ use SevenShores;
 use venveo\hubspottoolbox\HubspotToolbox;
 use venveo\hubspottoolbox\models\HubSpotApp;
 use venveo\hubspottoolbox\records\HubSpotFormRecord;
-use venveo\hubspottoolbox\records\TokenRecord;
 
 /**
  * HubSpotService Service
@@ -181,6 +180,7 @@ class HubspotService extends Component
      */
     public function submitForm(HubSpotFormRecord $formRecord, $data, $pageURL = null, $pageName = null)
     {
+        $data = $this->preprocessFormData($data);
         if (!$pageURL) {
             $pageURL = \Craft::$app->request->getReferrer();
         }
@@ -201,11 +201,22 @@ class HubspotService extends Component
         return $this->hubspot->forms()->submit($this->portalId, $formRecord->formId, $data);
     }
 
+    private function preprocessFormData($data)
+    {
+        return array_map(function($datum) {
+            if (is_array($datum)) {
+                return implode(';', array_keys($datum));
+            }
+            return $datum;
+        }, $data);
+    }
+
 
     /**
      * @return SevenShores\Hubspot\Factory
      */
-    public function getHubspot(): \SevenShores\Hubspot\Factory
+    public
+    function getHubspot(): \SevenShores\Hubspot\Factory
     {
         return $this->hubspot;
     }

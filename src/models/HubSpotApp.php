@@ -3,7 +3,6 @@
 namespace venveo\hubspottoolbox\models;
 
 use Carbon\Carbon;
-use Flipbox\OAuth2\Client\Provider\HubSpot;
 use SevenShores;
 use venveo\hubspottoolbox\records\TokenRecord;
 use yii\base\Model;
@@ -52,7 +51,7 @@ class HubSpotApp extends Model
         $callback = \Craft::$app->getConfig()->getGeneral()->siteUrl.'/'.\Craft::$app->getConfig()->getGeneral()->cpTrigger.'/hubspot-toolbox/oauth/'.$this->handle.'/callback';
 
         if (!$this->provider) {
-            $this->provider = new HubSpot([
+            $this->provider = new \Flipbox\OAuth2\Client\Provider\HubSpot([
                 'clientId' => $this->clientId,
                 'clientSecret' => $this->clientSecret,
                 'redirectUri' => $callback
@@ -88,7 +87,10 @@ class HubSpotApp extends Model
     {
         // First check the cache
         if ($token = \Craft::$app->cache->get($this->getCacheKey())) {
-            return $token;
+            $token = unserialize($token, [TokenRecord::class]);
+            if ($token instanceof TokenRecord) {
+                return $token;
+            }
         }
 
         // Check to see if we even have one in the db
@@ -111,7 +113,7 @@ class HubSpotApp extends Model
         $token->accessToken = $newToken->getToken();
         $token->expires = $newToken->getExpires();
         $token->save();
-        \Craft::$app->cache->set($this->getCacheKey(), $token->accessToken, $newToken->getExpires() - time() - 60);
+        \Craft::$app->cache->set($this->getCacheKey(), serialize($token), $newToken->getExpires() - time() - 60);
 
         return $token;
     }
