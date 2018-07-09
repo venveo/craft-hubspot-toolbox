@@ -24,7 +24,7 @@
     "require": {
         "craftcms/cms": "^3.0.0",
         "ryanwinchester/hubspot-php": "~1.0",
-        "flipboxdigital/oauth2-hubspot": "^1.0"
+        "flipboxdigital/oauth2-hubspot": "dev-master"
     },
     "autoload": {
         "psr-4": {
@@ -47,6 +47,6 @@
         "components": {
             "hubSpotService": "venveo\\hubspottoolbox\\services\\HubSpotService"
         },
-        "class": "venveo\\hubspottoolbox\\HubspotToolbox"
+        "class": "venveo\\hubspottoolbox\\HubSpotToolbox"
     }
 }

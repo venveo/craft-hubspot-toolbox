@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "cfb56563445274f20e5b8442482375e8",
+    "content-hash": "83052f65c5d55563d06f85f4a923cb3b",
     "packages": [
         {
             "name": "cebe/markdown",
@@ -861,16 +861,16 @@
         },
         {
             "name": "flipboxdigital/oauth2-hubspot",
-            "version": "1.0.0",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/venveo/oauth2-hubspot.git",
-                "reference": "41ceb431c8063504bda993bdb60a63348560361b"
+                "reference": "a789fb982a853960deeb832c6f7fed6adaf3db19"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/venveo/oauth2-hubspot/zipball/41ceb431c8063504bda993bdb60a63348560361b",
-                "reference": "41ceb431c8063504bda993bdb60a63348560361b",
+                "url": "https://api.github.com/repos/venveo/oauth2-hubspot/zipball/a789fb982a853960deeb832c6f7fed6adaf3db19",
+                "reference": "a789fb982a853960deeb832c6f7fed6adaf3db19",
                 "shasum": ""
             },
             "require": {
@@ -892,7 +892,11 @@
                     "Flipbox\\OAuth2\\Client\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "Flipbox\\OAuth2\\Client\\Test\\": "tests/src/"
+                }
+            },
             "license": [
                 "MIT"
             ],
@@ -905,7 +909,10 @@
                 "oauth",
                 "oauth2"
             ],
-            "time": "2017-06-06T04:03:52+00:00"
+            "support": {
+                "source": "https://github.com/venveo/oauth2-hubspot/tree/1.0.1"
+            },
+            "time": "2018-07-09T12:43:09+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -2745,7 +2752,9 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "flipboxdigital/oauth2-hubspot": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

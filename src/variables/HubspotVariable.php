@@ -10,10 +10,10 @@
 
 namespace venveo\hubspottoolbox\variables;
 
-use venveo\hubspottoolbox\HubspotToolbox;
+use venveo\hubspottoolbox\HubSpotToolbox;
 
 use Craft;
-use venveo\hubspottoolbox\services\HubspotService;
+use venveo\hubspottoolbox\services\HubSpotService;
 
 /**
  * HubSpot Toolbox Variable
@@ -43,17 +43,17 @@ class HubspotVariable
      */
     public function isContact()
     {
-        return HubspotToolbox::$plugin->getHubSpotService()->isContact();
+        return HubSpotToolbox::$plugin->getHubSpotService()->isContact();
     }
 
 
     public function forms()
     {
-        return HubspotToolbox::$plugin->getHubSpotService()->getAllForms();
+        return HubSpotToolbox::$plugin->getHubSpotService()->getAllForms();
     }
 
     public function portalId() {
-        $settings = HubspotToolbox::$plugin->getSettings();
+        $settings = HubSpotToolbox::$plugin->getSettings();
         return $settings['hubspotPortalId'];
     }
 }

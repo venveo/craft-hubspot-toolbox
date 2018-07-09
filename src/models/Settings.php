@@ -10,7 +10,7 @@
 
 namespace venveo\hubspottoolbox\models;
 
-use venveo\hubspottoolbox\HubspotToolbox;
+use venveo\hubspottoolbox\HubSpotToolbox;
 
 use Craft;
 use craft\base\Model;

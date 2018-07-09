@@ -4,7 +4,7 @@ namespace venveo\hubspottoolbox\controllers;
 
 use craft\web\Controller;
 use craftcms\oauth2;
-use venveo\hubspottoolbox\HubspotToolbox;
+use venveo\hubspottoolbox\HubSpotToolbox;
 use venveo\hubspottoolbox\models\HubSpotApp;
 use venveo\hubspottoolbox\records\TokenRecord;
 
@@ -19,7 +19,7 @@ class OauthController extends Controller
     public function actionCallback($appHandle)
     {
         /** @var HubSpotApp $app */
-        $app = HubspotToolbox::$plugin->getSettings()->getAppByHandle($appHandle);
+        $app = HubSpotToolbox::$plugin->getSettings()->getAppByHandle($appHandle);
         if (!$app) {
             $this->asErrorJson('App not found');
             return;
@@ -49,7 +49,7 @@ class OauthController extends Controller
     public function actionLogin($appHandle)
     {
         /** @var HubSpotApp $app */
-        $app = HubspotToolbox::$plugin->getSettings()->getAppByHandle($appHandle);
+        $app = HubSpotToolbox::$plugin->getSettings()->getAppByHandle($appHandle);
         if (!$app) {
             $this->asErrorJson('App not found');
             return;

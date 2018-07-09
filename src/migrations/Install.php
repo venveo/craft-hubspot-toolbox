@@ -10,7 +10,7 @@
 
 namespace venveo\hubspottoolbox\migrations;
 
-use venveo\hubspottoolbox\HubspotToolbox;
+use venveo\hubspottoolbox\HubSpotToolbox;
 
 use Craft;
 use craft\config\DbConfig;

@@ -13,7 +13,7 @@ namespace venveo\hubspottoolbox\services;
 use Craft;
 use craft\base\Component;
 use SevenShores;
-use venveo\hubspottoolbox\HubspotToolbox;
+use venveo\hubspottoolbox\HubSpotToolbox;
 use venveo\hubspottoolbox\models\HubSpotApp;
 use venveo\hubspottoolbox\models\HubSpotForm;
 use venveo\hubspottoolbox\models\HubSpotFormSubmission;
@@ -36,7 +36,7 @@ use venveo\hubspottoolbox\records\HubSpotFormRecord;
  * @property null $contact
  * @property null $uTK
  */
-class HubspotService extends Component
+class HubSpotService extends Component
 {
     private $portalId;
     private $app;
@@ -56,13 +56,13 @@ class HubspotService extends Component
     public function __construct($app = null)
     {
         parent::__construct();
-        $this->settings = HubspotToolbox::$plugin->getSettings();
+        $this->settings = HubSpotToolbox::$plugin->getSettings();
         if (!$app instanceof HubSpotApp) {
             $app = $this->settings->getDefaultApp();
         }
         $this->app = $app;
         $this->portalId = $this->settings->hubspotPortalId;
-        $this->hubspot = $this->app->getHubspotService();
+        $this->hubspot = $this->app->getHubSpotService();
         $this->utk = $this->getUTK();
     }
 

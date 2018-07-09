@@ -10,7 +10,7 @@
 
 namespace venveo\hubspottoolbox\twigextensions;
 
-use venveo\hubspottoolbox\HubspotToolbox;
+use venveo\hubspottoolbox\HubSpotToolbox;
 
 use Craft;
 

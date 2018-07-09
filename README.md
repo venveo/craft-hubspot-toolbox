@@ -1,12 +1,12 @@
 # HubSpot Toolbox plugin for Craft CMS 3.x
-
+## Features
+- Login to oAuth HubSpot apps
+- Submit forms via API
+- Custom Field for HubSpot Forms (render in Twig or get attributes)
+- Get HubSpot contact properties (Have they filled out a form?)
 ## Installation
 
         composer require venveo/hubspot-toolbox
-
-3. In the Control Panel, go to Settings → Plugins and click the “Install” button for HubSpot Toolbox.
-
-## HubSpot Toolbox Overview
 
 ## Configuring HubSpot Toolbox
 1. Copy the default config file to your config folder as `hubspot-toolbox.php`
@@ -39,9 +39,5 @@
 -Insert text here-
 
 ## HubSpot Toolbox Roadmap
-
-Some things to do, and ideas for potential features:
-
-* Release it
 
 Brought to you by [Venveo](https://venveo.com)

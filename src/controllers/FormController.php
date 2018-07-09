@@ -3,7 +3,7 @@
 namespace venveo\hubspottoolbox\controllers;
 
 use craft\web\Controller;
-use venveo\hubspottoolbox\HubspotToolbox;
+use venveo\hubspottoolbox\HubSpotToolbox;
 use venveo\hubspottoolbox\records\HubSpotFormRecord;
 
 /**
@@ -24,7 +24,7 @@ class FormController extends Controller
     {
         $this->requirePostRequest();
 
-        $service = HubspotToolbox::$plugin->getHubSpotService();
+        $service = HubSpotToolbox::$plugin->getHubSpotService();
         /** @var HubSpotFormRecord $form */
         $form = HubSpotFormRecord::findOne(['id' => $formId]);
         if (!$form) {

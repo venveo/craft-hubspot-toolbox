@@ -10,7 +10,7 @@
 
 namespace venveo\hubspottoolbox\fields;
 
-use venveo\hubspottoolbox\HubspotToolbox;
+use venveo\hubspottoolbox\HubSpotToolbox;
 use venveo\hubspottoolbox\assetbundles\hubspotformfield\HubSpotFormFieldAsset;
 
 use Craft;
@@ -76,7 +76,7 @@ class HubSpotFormField extends Field
         if (is_string($value)) {
             $value = Json::decode($value);
         }
-        $pluginSettings = HubspotToolbox::$plugin->getSettings();
+        $pluginSettings = HubSpotToolbox::$plugin->getSettings();
         $form = HubSpotFormRecord::findOne($value['siteFormId']);
         if (!$form) {
             return null;

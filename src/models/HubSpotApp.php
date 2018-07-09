@@ -10,6 +10,11 @@ use yii\base\Model;
 /**
  * Class Link
  *
+ *
+ * @property mixed $connectURL
+ * @property string $cacheKey
+ * @property string $loginURL
+ * @property null|\venveo\hubspottoolbox\records\TokenRecord $token
  */
 class HubSpotApp extends Model
 {
@@ -123,7 +128,7 @@ class HubSpotApp extends Model
      *
      * @return SevenShores\Hubspot\Factory
      */
-    public function getHubspotService()
+    public function getHubSpotService()
     {
         if (!$this->hubspotService instanceof SevenShores\Hubspot\Factory) {
             $this->hubspotService = new SevenShores\Hubspot\Factory(

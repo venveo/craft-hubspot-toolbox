@@ -103,7 +103,7 @@ EOD;
     }
 
     public function submitted() {
-        $service = \venveo\hubspottoolbox\HubspotToolbox::$plugin->getHubSpotService();
+        $service = \venveo\hubspottoolbox\HubSpotToolbox::$plugin->getHubSpotService();
         return $service->hasFilledOutForm($this);
     }
 

@@ -19,8 +19,7 @@ use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
 use venveo\hubspottoolbox\fields\HubSpotFormField;
 use venveo\hubspottoolbox\models\Settings;
-use venveo\hubspottoolbox\services\HubspotService;
-use venveo\hubspottoolbox\services\HubspotService as HubSpotServiceService;
+use venveo\hubspottoolbox\services\HubSpotService;
 use venveo\hubspottoolbox\twigextensions\HubspotToolboxTwigExtension;
 use venveo\hubspottoolbox\variables\HubspotVariable;
 use yii\base\Event;
@@ -39,11 +38,11 @@ use yii\base\Event;
  * @package   HubspotToolbox
  * @since     1.0.0
  *
- * @property  HubSpotServiceService $hubSpotService
+ * @property  HubSpotService $hubSpotService
  * @property  Settings $settings
  * @method    Settings getSettings()
  */
-class HubspotToolbox extends Plugin
+class HubSpotToolbox extends Plugin
 {
     // Static Properties
     // =========================================================================
@@ -52,7 +51,7 @@ class HubspotToolbox extends Plugin
      * Static property that is an instance of this plugin class so that it can be accessed via
      * HubspotToolbox::$plugin
      *
-     * @var HubspotToolbox
+     * @var HubSpotToolbox
      */
     public static $plugin;
 
@@ -134,7 +133,7 @@ class HubspotToolbox extends Plugin
     public function getHubSpotService($app = null)
     {
         if ($this->_hubspotService == null) {
-            $this->_hubspotService = new HubspotService($app);
+            $this->_hubspotService = new HubSpotService($app);
         }
 
         return $this->_hubspotService;
