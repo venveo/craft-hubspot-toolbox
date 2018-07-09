@@ -17,7 +17,7 @@ use Craft;
 use craft\base\ElementInterface;
 use craft\base\Field;
 use craft\helpers\Db;
-use venveo\hubspottoolbox\models\HubSpotFormModel;
+use venveo\hubspottoolbox\models\HubSpotForm;
 use venveo\hubspottoolbox\records\HubSpotFormRecord;
 use yii\db\Schema;
 use craft\helpers\Json;
@@ -90,7 +90,7 @@ class HubSpotFormField extends Field
         $attr['siteId'] = $form->siteId;
         $attr['portalId'] = $hbPortalId;
 
-        $form = new HubSpotFormModel($attr);
+        $form = new HubSpotForm($attr);
         return $form;
     }
 

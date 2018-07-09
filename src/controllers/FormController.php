@@ -32,7 +32,6 @@ class FormController extends Controller
             $this->asJson(['message' => 'Form not found']);
             return;
         }
-
         $data = \Craft::$app->request->getBodyParams();
         $pageURL = null;
         $pageTitle = null;

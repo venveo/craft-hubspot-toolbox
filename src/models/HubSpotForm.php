@@ -5,16 +5,17 @@ namespace venveo\hubspottoolbox\models;
 use craft\base\Element;
 use craft\base\ElementInterface;
 use craft\helpers\Template;
+use venveo\hubspottoolbox\records\HubSpotFormRecord;
 use yii\base\Model;
 
 /**
  * Class Link
  *
+ *
+ * @property \craft\models\Site $ownerSite
  */
-class HubSpotFormModel extends Model
+class HubSpotForm extends Model
 {
-
-
     /**
      * @var string
      */
@@ -128,4 +129,14 @@ EOD;
     public function id() {
         return $this->siteFormId;
     }
+
+    public static function fromRecord(HubSpotFormRecord $record) {
+        $instance = new self();
+        $instance->siteFormId = $record->id;
+        $instance->siteId = $record->siteId;
+        $instance->formId = $record->formId;
+        $instance->formName = $record->formName;
+        return $instance;
+    }
+
 }

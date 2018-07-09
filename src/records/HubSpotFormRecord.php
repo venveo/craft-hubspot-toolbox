@@ -30,6 +30,7 @@ use craft\db\ActiveRecord;
  * @property  string formName
  * @property  string formId
  * @property int siteId
+ * @property int id
  * @author    Venveo
  * @package   HubspotToolbox
  * @since     1.0.0

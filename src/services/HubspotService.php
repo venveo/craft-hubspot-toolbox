@@ -15,6 +15,8 @@ use craft\base\Component;
 use SevenShores;
 use venveo\hubspottoolbox\HubspotToolbox;
 use venveo\hubspottoolbox\models\HubSpotApp;
+use venveo\hubspottoolbox\models\HubSpotForm;
+use venveo\hubspottoolbox\models\HubSpotFormSubmission;
 use venveo\hubspottoolbox\records\HubSpotFormRecord;
 
 /**
@@ -177,46 +179,36 @@ class HubspotService extends Component
      * @param string|null $pageURL
      * @param string|null $pageName
      * @return SevenShores\Hubspot\Http\Response
+     * @throws \craft\errors\MissingComponentException
      */
     public function submitForm(HubSpotFormRecord $formRecord, $data, $pageURL = null, $pageName = null)
     {
-        $data = $this->preprocessFormData($data);
+        $formModel = HubSpotForm::fromRecord($formRecord);
+        $submission = new HubSpotFormSubmission();
+        $submission->hubspotForm = $formModel;
+        $submission->data = $data;
+
         if (!$pageURL) {
             $pageURL = \Craft::$app->request->getReferrer();
         }
-        $hs_context = json_encode(array_filter([
-            'hutk' => $this->getUTK(),
-            'ipAddress' => \Craft::$app->request->getRemoteIP(),
-            'pageUrl' => $pageURL,
-            'pageName' => $pageName
-        ]));
-        $data['hs_context'] = $hs_context;
-        unset($data['pageTitle'], $data['pageURL']);
+        $submission->pageURL = $pageURL;
+        $submission->hutk = $this->getUTK();
+        $submission->pageName = $pageName;
+        $submission->ipAddress = \Craft::$app->request->getRemoteIP();
 
         $filled = json_decode(\Craft::$app->getSession()->get('hs_forms', \GuzzleHttp\json_encode([])), true);
-        $filled[$formRecord->formId] = true;
+        $filled[$formModel->formId] = true;
+
         \Craft::$app->getSession()->set('hs_forms', \GuzzleHttp\json_encode($filled));
 
-
-        return $this->hubspot->forms()->submit($this->portalId, $formRecord->formId, $data);
-    }
-
-    private function preprocessFormData($data)
-    {
-        return array_map(function($datum) {
-            if (is_array($datum)) {
-                return implode(';', array_keys($datum));
-            }
-            return $datum;
-        }, $data);
+        return $this->hubspot->forms()->submit($this->portalId, $formModel->formId, $submission->getData());
     }
 
 
     /**
      * @return SevenShores\Hubspot\Factory
      */
-    public
-    function getHubspot(): \SevenShores\Hubspot\Factory
+    public function getHubspot(): \SevenShores\Hubspot\Factory
     {
         return $this->hubspot;
     }
