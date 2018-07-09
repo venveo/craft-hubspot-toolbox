@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "5aab8966fde9684554d6befbe7db76e6",
+    "content-hash": "cfb56563445274f20e5b8442482375e8",
     "packages": [
         {
             "name": "cebe/markdown",
@@ -864,12 +864,12 @@
             "version": "1.0.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/flipbox/oauth2-hubspot.git",
+                "url": "https://github.com/venveo/oauth2-hubspot.git",
                 "reference": "41ceb431c8063504bda993bdb60a63348560361b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/flipbox/oauth2-hubspot/zipball/41ceb431c8063504bda993bdb60a63348560361b",
+                "url": "https://api.github.com/repos/venveo/oauth2-hubspot/zipball/41ceb431c8063504bda993bdb60a63348560361b",
                 "reference": "41ceb431c8063504bda993bdb60a63348560361b",
                 "shasum": ""
             },
@@ -1307,17 +1307,20 @@
         },
         {
             "name": "mikehaertl/php-shellcommand",
-            "version": "1.4.0",
+            "version": "1.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mikehaertl/php-shellcommand.git",
-                "reference": "727e2143578796c714a50c0a350459758ff16c43"
+                "reference": "903ee95d3ee8f65ebbe4c6e17705d1d91760521a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mikehaertl/php-shellcommand/zipball/727e2143578796c714a50c0a350459758ff16c43",
-                "reference": "727e2143578796c714a50c0a350459758ff16c43",
+                "url": "https://api.github.com/repos/mikehaertl/php-shellcommand/zipball/903ee95d3ee8f65ebbe4c6e17705d1d91760521a",
+                "reference": "903ee95d3ee8f65ebbe4c6e17705d1d91760521a",
                 "shasum": ""
+            },
+            "require": {
+                "php": ">= 5.4.0"
             },
             "type": "library",
             "autoload": {
@@ -1339,7 +1342,7 @@
             "keywords": [
                 "shell"
             ],
-            "time": "2018-02-16T07:02:50+00:00"
+            "time": "2018-07-07T07:35:36+00:00"
         },
         {
             "name": "paragonie/random_compat",
@@ -2742,9 +2745,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "craftcms/cms": 5
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

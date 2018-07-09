@@ -22,7 +22,7 @@
         }
     ],
     "require": {
-        "craftcms/cms": "^3.0.0-RC1",
+        "craftcms/cms": "^3.0.0",
         "ryanwinchester/hubspot-php": "~1.0",
         "flipboxdigital/oauth2-hubspot": "^1.0"
     },
@@ -31,6 +31,13 @@
           "venveo\\hubspottoolbox\\": "src/"
         }
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/venveo/oauth2-hubspot"
+
+        }
+    ],
     "extra": {
         "name": "HubSpot Toolbox",
         "handle": "hubspot-toolbox",
