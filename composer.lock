@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "83052f65c5d55563d06f85f4a923cb3b",
+    "content-hash": "e6623984fb5eddfd0bbdb89ea55ba380",
     "packages": [
         {
             "name": "cebe/markdown",
@@ -324,16 +324,16 @@
         },
         {
             "name": "craftcms/cms",
-            "version": "3.0.14",
+            "version": "3.0.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/craftcms/cms.git",
-                "reference": "56a91951c79bce33f784a8b1674a87037a5fb950"
+                "reference": "9f31ce73985cc88f5f8a684bb32da7a56a1cfc77"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/craftcms/cms/zipball/56a91951c79bce33f784a8b1674a87037a5fb950",
-                "reference": "56a91951c79bce33f784a8b1674a87037a5fb950",
+                "url": "https://api.github.com/repos/craftcms/cms/zipball/9f31ce73985cc88f5f8a684bb32da7a56a1cfc77",
+                "reference": "9f31ce73985cc88f5f8a684bb32da7a56a1cfc77",
                 "shasum": ""
             },
             "require": {
@@ -402,7 +402,7 @@
                 "craftcms",
                 "yii2"
             ],
-            "time": "2018-07-03T23:13:18+00:00"
+            "time": "2018-07-09T14:37:11+00:00"
         },
         {
             "name": "craftcms/oauth2-craftid",
@@ -861,16 +861,16 @@
         },
         {
             "name": "flipboxdigital/oauth2-hubspot",
-            "version": "dev-master",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/venveo/oauth2-hubspot.git",
-                "reference": "a789fb982a853960deeb832c6f7fed6adaf3db19"
+                "url": "https://github.com/flipbox/oauth2-hubspot.git",
+                "reference": "4e7def2ee4505dfc206cfa1969fa7ed2b2f89af8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/venveo/oauth2-hubspot/zipball/a789fb982a853960deeb832c6f7fed6adaf3db19",
-                "reference": "a789fb982a853960deeb832c6f7fed6adaf3db19",
+                "url": "https://api.github.com/repos/flipbox/oauth2-hubspot/zipball/4e7def2ee4505dfc206cfa1969fa7ed2b2f89af8",
+                "reference": "4e7def2ee4505dfc206cfa1969fa7ed2b2f89af8",
                 "shasum": ""
             },
             "require": {
@@ -892,11 +892,7 @@
                     "Flipbox\\OAuth2\\Client\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Flipbox\\OAuth2\\Client\\Test\\": "tests/src/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -909,10 +905,7 @@
                 "oauth",
                 "oauth2"
             ],
-            "support": {
-                "source": "https://github.com/venveo/oauth2-hubspot/tree/1.0.1"
-            },
-            "time": "2018-07-09T12:43:09+00:00"
+            "time": "2018-07-09T15:15:59+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -2752,9 +2745,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "flipboxdigital/oauth2-hubspot": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
