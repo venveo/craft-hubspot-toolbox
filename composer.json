@@ -2,7 +2,7 @@
     "name": "venveo/hubspot-toolbox",
     "description": "Turnkey HubSpot integration for CraftCMS",
     "type": "craft-plugin",
-    "version": "1.0.0-beta2",
+    "version": "1.0.0-beta3",
     "keywords": [
         "craft",
         "cms",
