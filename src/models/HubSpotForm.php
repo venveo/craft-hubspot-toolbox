@@ -77,7 +77,8 @@ class HubSpotForm extends Model
 	portalId: "${portalId}",
 	formId: "${formId}",
 	target: "#${domId}",
-	css: ""
+	css: '',
+	cssRequired: ''
 });
 </script>
 <div id="${domId}"></div>
