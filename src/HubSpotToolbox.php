@@ -19,128 +19,89 @@ use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
 use venveo\hubspottoolbox\fields\HubSpotFormField;
 use venveo\hubspottoolbox\models\Settings;
+use venveo\hubspottoolbox\services\FeaturesService;
+use venveo\hubspottoolbox\services\HubSpotEcommService;
 use venveo\hubspottoolbox\services\HubSpotService;
+use venveo\hubspottoolbox\services\OauthService;
 use venveo\hubspottoolbox\twigextensions\HubspotToolboxTwigExtension;
 use venveo\hubspottoolbox\variables\HubspotVariable;
 use yii\base\Event;
 
 /**
- * Craft plugins are very much like little applications in and of themselves. We’ve made
- * it as simple as we can, but the training wheels are off. A little prior knowledge is
- * going to be required to write a plugin.
- *
- * For the purposes of the plugin docs, we’re going to assume that you know PHP and SQL,
- * as well as some semi-advanced concepts like object-oriented programming and PHP namespaces.
- *
- * https://craftcms.com/docs/plugins/introduction
- *
  * @author    Venveo
  * @package   HubspotToolbox
  * @since     1.0.0
  *
- * @property  HubSpotService $hubSpotService
+ * @property  HubSpotService $hubspot
+ * @property  OauthService $oauth
+ * @property  FeaturesService $features
+ * @property  HubSpotEcommService $ecomm
+ * @property-read array $cpNavItem
  * @property  Settings $settings
  * @method    Settings getSettings()
  */
 class HubSpotToolbox extends Plugin
 {
-    // Static Properties
-    // =========================================================================
+    public $hasCpSection = true;
+    public $hasCpSettings = true;
 
     /**
-     * Static property that is an instance of this plugin class so that it can be accessed via
-     * HubspotToolbox::$plugin
-     *
      * @var HubSpotToolbox
      */
     public static $plugin;
 
-    // Public Properties
-    // =========================================================================
+    public $schemaVersion = '1.0.0';
 
-    public $_hubspotService;
-    /**
-     * To execute your plugin’s migrations, you’ll need to increase its schema version.
-     *
-     * @var string
-     */
-    public $schemaVersion = '1.0.1';
-
-    // Public Methods
-    // =========================================================================
+    static $devServerManifestPath = 'https://craft3-plugindev.test:3000/dist';
+    static $devServerPublicPath = 'https://craft3-plugindev.test:3000/dist/_assets';
+    static $devServerEnabled = true;
 
     /**
-     * Set our $plugin static property to this class so that it can be accessed via
-     * HubspotToolbox::$plugin
-     *
-     * Called after the plugin class is instantiated; do any one-time initialization
-     * here such as hooks and events.
-     *
-     * If you have a '/vendor/autoload.php' file, it will be loaded for you automatically;
-     * you do not need to load it in your init() method.
-     *
      */
     public function init()
     {
         parent::init();
         self::$plugin = $this;
 
+        $this->setComponents([
+            'hubspot' => HubSpotService::class,
+            'ecomm' => HubSpotEcommService::class,
+            'oauth' => OauthService::class,
+            'features' => FeaturesService::class
+        ]);
+
         // Add in our Twig extensions
         Craft::$app->view->registerTwigExtension(new HubspotToolboxTwigExtension());
 
         // Register our fields
-        Event::on(
-            Fields::class,
-            Fields::EVENT_REGISTER_FIELD_TYPES,
-            function(RegisterComponentTypesEvent $event) {
-                $event->types[] = HubSpotFormField::class;
-            }
+        Event::on(Fields::class, Fields::EVENT_REGISTER_FIELD_TYPES, function (RegisterComponentTypesEvent $event) {
+            $event->types[] = HubSpotFormField::class;
+        }
         );
 
-        // Register our CP routes
         Event::on(
             UrlManager::class,
             UrlManager::EVENT_REGISTER_CP_URL_RULES,
-            function(RegisterUrlRulesEvent $event) {
-                $event->rules['hubspot-toolbox'] = 'hubspot-toolbox/hubspot/dashboard';
-                $event->rules['hubspot-toolbox/forms'] = 'hubspot-toolbox/hubspot/forms-index';
-
-                $event->rules['hubspot-toolbox/oauth/<appHandle:[a-zA-Z0-9_\-]+>/login'] = ['route' => 'hubspot-toolbox/oauth/login'];
-                $event->rules['hubspot-toolbox/oauth/<appHandle:[a-zA-Z0-9_\-]+>/callback'] = ['route' => 'hubspot-toolbox/oauth/callback'];
+            function (RegisterUrlRulesEvent $event) {
+                $event->rules['hubspot-toolbox'] = 'hubspot-toolbox/features/index';
+                $event->rules['hubspot-toolbox/features'] = 'hubspot-toolbox/features/index';
+                $event->rules['hubspot-toolbox/features/<section:{handle}>'] = 'hubspot-toolbox/features/index';
+                $event->rules['hubspot-toolbox/connection'] = 'hubspot-toolbox/connection/index';
             }
         );
 
-        // Register site routes
-        Event::on(
-            UrlManager::class,
-            UrlManager::EVENT_REGISTER_SITE_URL_RULES,
+        Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_SITE_URL_RULES,
             function (RegisterUrlRulesEvent $event) {
                 $event->rules['api/hub/submit/<formId:\d+>'] = ['route' => 'hubspot-toolbox/form/submit'];
             }
         );
 
-        // Register our variables
-        Event::on(
-            CraftVariable::class,
-            CraftVariable::EVENT_INIT,
-            function(Event $event) {
-                $variable = $event->sender;
-                $variable->set('hubspot', HubspotVariable::class);
-            }
+        Event::on(CraftVariable::class, CraftVariable::EVENT_INIT, function (Event $event) {
+            $variable = $event->sender;
+            $variable->set('hubspot', HubspotVariable::class);
+        }
         );
     }
-
-    public function getHubSpotService($app = null)
-    {
-        if ($this->_hubspotService == null) {
-            $this->_hubspotService = new HubSpotService($app);
-        }
-
-        return $this->_hubspotService;
-    }
-
-    // Protected Methods
-    // =========================================================================
 
     /**
      * Creates and returns the model used to store the plugin’s settings.
@@ -152,37 +113,32 @@ class HubSpotToolbox extends Plugin
         return new Settings();
     }
 
-    /**
-     * Returns the rendered settings HTML, which will be inserted into the content
-     * block on the settings page.
-     *
-     * @return string The rendered settings HTML
-     */
-    protected function settingsHtml(): string
-    {
-        return Craft::$app->view->renderTemplate(
-            'hubspot-toolbox/settings',
-            [
-                'settings' => $this->getSettings()
-            ]
-        );
-    }
-
 
     public function getCpNavItem(): array
     {
         $ret = parent::getCpNavItem();
         $ret['label'] = Craft::t('hubspot-toolbox', 'HubSpot');
 
-        $ret['subnav']['dashboard'] = [
-            'label' => Craft::t('hubspot-toolbox', 'Dashboard'),
-            'url' => 'hubspot-toolbox/dashboard'
+        $ret['subnav']['features'] = [
+            'label' => Craft::t('hubspot-toolbox', 'Features'),
+            'url' => 'hubspot-toolbox/features'
         ];
-        $ret['subnav']['forms'] = [
-            'label' => Craft::t('hubspot-toolbox', 'Forms'),
-            'url' => 'hubspot-toolbox/forms'
+
+        $ret['subnav']['connection'] = [
+            'label' => Craft::t('hubspot-toolbox', 'Connection'),
+            'url' => 'hubspot-toolbox/connection'
         ];
 
         return $ret;
+    }
+
+    public function settingsHtml()
+    {
+        return Craft::$app->view->renderTemplate(
+            'hubspot-toolbox/_settings',
+            [
+                'settings' => $this->getSettings()
+            ]
+        );
     }
 }

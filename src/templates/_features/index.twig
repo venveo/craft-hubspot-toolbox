@@ -1,0 +1,8 @@
+{% extends 'hubspot-toolbox/_features/layout.twig' %}
+{% set fullPageForm = true %}
+
+{% set content %}
+    {{ actionInput('hubspot-toolbox/features/save') }}
+    {{ hiddenInput('feature', feature.handle) }}
+    {{ feature.renderSettingsHtml }}
+{% endset %}

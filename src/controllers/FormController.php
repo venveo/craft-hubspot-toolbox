@@ -15,7 +15,6 @@ use venveo\hubspottoolbox\records\HubSpotFormRecord;
 class FormController extends Controller
 {
     protected $allowAnonymous = ['submit'];
-    public $enableCsrfValidation = false; // TODO: Remove this
 
     /**
      * @return mixed

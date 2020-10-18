@@ -14,9 +14,10 @@ use Craft;
 use craft\base\Component;
 use SevenShores;
 use venveo\hubspottoolbox\HubSpotToolbox;
-use venveo\hubspottoolbox\models\HubSpotApp;
-use venveo\hubspottoolbox\models\HubSpotForm;
-use venveo\hubspottoolbox\models\HubSpotFormSubmission;
+use venveo\hubspottoolbox\entities\HubSpotApp;
+use venveo\hubspottoolbox\entities\HubSpotForm;
+use venveo\hubspottoolbox\entities\HubSpotFormSubmission;
+use venveo\hubspottoolbox\entities\Settings;
 use venveo\hubspottoolbox\records\HubSpotFormRecord;
 
 /**
@@ -38,31 +39,25 @@ use venveo\hubspottoolbox\records\HubSpotFormRecord;
  */
 class HubSpotService extends Component
 {
-    private $portalId;
-    private $app;
     private $utk;
-    /** @var \venveo\hubspottoolbox\models\Settings */
-    private $settings;
-    private $hubspot;
+    private $hubId;
+    private Settings $settings;
+    public SevenShores\Hubspot\Factory $hubspot;
+    public SevenShores\Hubspot\Factory $hubspotFromKey;
 
     // Public Methods
     // =========================================================================
 
-    /**
-     * HubspotService constructor.
-     *
-     * @param null $app
-     */
-    public function __construct($app = null)
+    public function init()
     {
-        parent::__construct();
+        /** @var Settings settings */
         $this->settings = HubSpotToolbox::$plugin->getSettings();
-        if (!$app instanceof HubSpotApp) {
-            $app = $this->settings->getDefaultApp();
-        }
-        $this->app = $app;
-        $this->portalId = $this->settings->hubspotPortalId;
-        $this->hubspot = $this->app->getHubSpotService();
+        $token = HubSpotToolbox::$plugin->oauth->getToken(Craft::parseEnv($this->settings->appId));
+        $apiKey = Craft::parseEnv($this->settings->apiKey);
+        $this->hubId = $token->hubId;
+
+        $this->hubspot = SevenShores\Hubspot\Factory::createWithOAuth2Token($token->accessToken);
+        $this->hubspotFromKey = SevenShores\Hubspot\Factory::create($apiKey);
         $this->utk = $this->getUTK();
     }
 
@@ -78,9 +73,10 @@ class HubSpotService extends Component
      */
     public function isContact()
     {
-        if (!$this->utk) {
-            return false;
-        }
+//        if (!$this->utk) {
+//            return false;
+//        }
+
         $contact = $this->hubspot->contacts()->getByToken($this->utk)->getData();
         return (bool)$contact->{'is-contact'};
     }
@@ -98,72 +94,72 @@ class HubSpotService extends Component
         return $contact;
     }
 
-
-    /**
-     * @param $form
-     * @return bool
-     */
-    public function hasFilledOutForm($form)
-    {
-        $filled = json_decode(\Craft::$app->getSession()->get('hs_forms', \GuzzleHttp\json_encode([])), true);
-        if (array_key_exists($form->formId, $filled)) {
-            return true;
-        }
-        if (!$this->utk) {
-            return false;
-        }
-        $contact = $this->hubspot->contacts()->getByToken($this->utk)->getData();
-
-        if (!$contact->{'is-contact'}) {
-            return false;
-        }
-        if (!$contact->{'form-submissions'} || !count($contact->{'form-submissions'})) {
-            return false;
-        }
-        foreach ($contact->{'form-submissions'} as $submission) {
-            if ($submission->{'form-id'} === $form->formId) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public function getAllForms()
-    {
-        $this->app->getToken();
-        $this->syncForms();
-        $siteId = Craft::$app->getSites()->getCurrentSite()->id;
-        $forms = HubSpotFormRecord::find([
-            'siteId' => $siteId
-        ])->all();
-        return $forms;
-    }
-
-    private function syncForms()
-    {
-        $forms = $this->hubspot->forms()->all()->getData();
-        $siteId = Craft::$app->getSites()->getCurrentSite()->id;
-        $exists = [];
-        foreach ($forms as $form) {
-            if ($siteForm = HubSpotFormRecord::findOne(['formId' => $form->guid])) {
-                $siteForm->formName = $form->name;
-            } else {
-                $siteForm = new HubSpotFormRecord();
-                $siteForm->formId = $form->guid;
-                $siteForm->siteId = $siteId;
-                $siteForm->formName = $form->name;
-            }
-            $exists[] = $siteForm->formId;
-            $siteForm->save();
-        }
-
-        $siteForms = HubSpotFormRecord::find()->all();
-        foreach ($siteForms as $form) {
-            if (!in_array($form->formId, $exists)) {
-                $form->delete();
-            }
-        }
-    }
+//
+//    /**
+//     * @param $form
+//     * @return bool
+//     */
+//    public function hasFilledOutForm($form)
+//    {
+//        $filled = json_decode(\Craft::$app->getSession()->get('hs_forms', \GuzzleHttp\json_encode([])), true);
+//        if (array_key_exists($form->formId, $filled)) {
+//            return true;
+//        }
+//        if (!$this->utk) {
+//            return false;
+//        }
+//        $contact = $this->hubspot->contacts()->getByToken($this->utk)->getData();
+//
+//        if (!$contact->{'is-contact'}) {
+//            return false;
+//        }
+//        if (!$contact->{'form-submissions'} || !count($contact->{'form-submissions'})) {
+//            return false;
+//        }
+//        foreach ($contact->{'form-submissions'} as $submission) {
+//            if ($submission->{'form-id'} === $form->formId) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+//
+//    public function getAllForms()
+//    {
+//        $this->app->getToken();
+//        $this->syncForms();
+//        $siteId = Craft::$app->getSites()->getCurrentSite()->id;
+//        $forms = HubSpotFormRecord::find([
+//            'siteId' => $siteId
+//        ])->all();
+//        return $forms;
+//    }
+//
+//    private function syncForms()
+//    {
+//        $forms = $this->hubspot->forms()->all()->getData();
+//        $siteId = Craft::$app->getSites()->getCurrentSite()->id;
+//        $exists = [];
+//        foreach ($forms as $form) {
+//            if ($siteForm = HubSpotFormRecord::findOne(['formId' => $form->guid])) {
+//                $siteForm->formName = $form->name;
+//            } else {
+//                $siteForm = new HubSpotFormRecord();
+//                $siteForm->formId = $form->guid;
+//                $siteForm->siteId = $siteId;
+//                $siteForm->formName = $form->name;
+//            }
+//            $exists[] = $siteForm->formId;
+//            $siteForm->save();
+//        }
+//
+//        $siteForms = HubSpotFormRecord::find()->all();
+//        foreach ($siteForms as $form) {
+//            if (!in_array($form->formId, $exists)) {
+//                $form->delete();
+//            }
+//        }
+//    }
 
     private function getUTK()
     {
@@ -189,7 +185,7 @@ class HubSpotService extends Component
         $submission->data = $data;
 
         if (!$pageURL) {
-            $pageURL = \Craft::$app->request->getReferrer();
+            $pageURL = \Craft::$app->requrest->getReferrer();
         }
         $submission->pageURL = $pageURL;
         $submission->hutk = $this->getUTK();
@@ -206,10 +202,14 @@ class HubSpotService extends Component
 
 
     /**
+     * @param bool $useApiKey
      * @return SevenShores\Hubspot\Factory
      */
-    public function getHubspot(): \SevenShores\Hubspot\Factory
+    public function getHubspot($useApiKey = false): \SevenShores\Hubspot\Factory
     {
+        if ($useApiKey) {
+            return $this->hubspotFromKey;
+        }
         return $this->hubspot;
     }
 }

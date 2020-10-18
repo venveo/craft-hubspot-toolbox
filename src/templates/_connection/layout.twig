@@ -1,0 +1,22 @@
+{% extends '_layouts/cp.html' %}
+
+{% set title = title|default('HubSpot Connection') %}
+
+{#{% set sidebarItems = {#}
+{#    forms: {#}
+{#        label: 'Forms',#}
+{#        url: cpUrl('hubspot-toolbox/features/forms')#}
+{#    }#}
+{#} %}#}
+
+{#{% set selectedSidebarItem = selectedSidebarItem|default(null) %}#}
+
+{#{% block sidebar %}#}
+{#    <nav>#}
+{#        <ul>#}
+{#            {% for k,v in sidebarItems %}#}
+{#                <li><a href="{{ v.url }}" {% if k == selectedSidebarItem %}class="sel"{% endif %}><span class="label">{{ v.label }}</span></a></li>#}
+{#            {% endfor %}#}
+{#        </ul>#}
+{#    </nav>#}
+{#{% endblock %}#}

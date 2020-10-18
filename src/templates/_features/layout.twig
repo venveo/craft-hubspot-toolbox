@@ -1,0 +1,28 @@
+{% extends '_layouts/cp.html' %}
+
+{% set title = title|default('HubSpot Features') %}
+
+{% set sidebarItems = {} %}
+{% for feature in features %}
+    {% set sidebarItems = sidebarItems|merge({
+        (feature.handle): {
+            label: feature.name,
+            url: cpUrl('hubspot-toolbox/features/' ~ feature.handle)
+        }
+    }) %}
+{% endfor %}
+
+{% set selectedSidebarItem = selectedSidebarItem|default(null) %}
+{% if feature %}
+    {% set selectedSidebarItem = feature.handle %}
+{% endif %}
+
+{% block sidebar %}
+    <nav>
+        <ul>
+            {% for k,v in sidebarItems %}
+                <li><a href="{{ v.url }}" {% if k == selectedSidebarItem %}class="sel"{% endif %}><span class="label">{{ v.label }}</span></a></li>
+            {% endfor %}
+        </ul>
+    </nav>
+{% endblock %}

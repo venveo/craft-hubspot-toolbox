@@ -17,7 +17,7 @@ use Craft;
 use craft\base\ElementInterface;
 use craft\base\Field;
 use craft\helpers\Db;
-use venveo\hubspottoolbox\models\HubSpotForm;
+use venveo\hubspottoolbox\entities\HubSpotForm;
 use venveo\hubspottoolbox\records\HubSpotFormRecord;
 use yii\db\Schema;
 use craft\helpers\Json;

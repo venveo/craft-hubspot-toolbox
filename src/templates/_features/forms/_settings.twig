@@ -1,0 +1,10 @@
+{% import "_includes/forms" as forms %}
+{% namespace 'settings' %}
+{{ forms.textField({
+    label: 'Form - Test',
+    instructions: "Test",
+    id: 'Test',
+    name: 'Test',
+    value: feature.test
+}) }}
+{% endnamespace %}

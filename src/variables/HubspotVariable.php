@@ -43,7 +43,7 @@ class HubspotVariable
      */
     public function isContact()
     {
-        return HubSpotToolbox::$plugin->getHubSpotService()->isContact();
+        return HubSpotToolbox::$plugin->hubspot->isContact();
     }
 
 
