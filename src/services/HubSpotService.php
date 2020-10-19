@@ -40,7 +40,7 @@ class HubSpotService extends Component
     private $hubId;
     private Settings $settings;
     public SevenShores\Hubspot\Factory $hubspot;
-    public SevenShores\Hubspot\Factory $hubspotFromKey;
+    public SevenShores\Hubspot\Factory $hubspotDev;
 
     // Public Methods
     // =========================================================================
@@ -50,11 +50,11 @@ class HubSpotService extends Component
         /** @var Settings settings */
         $this->settings = HubSpotToolbox::$plugin->getSettings();
         $token = HubSpotToolbox::$plugin->oauth->getToken(Craft::parseEnv($this->settings->appId));
-        $apiKey = Craft::parseEnv($this->settings->apiKey);
+        $devApiKey = Craft::parseEnv($this->settings->devApiKey);
         $this->hubId = $token->hubId;
 
         $this->hubspot = SevenShores\Hubspot\Factory::createWithOAuth2Token($token->accessToken);
-        $this->hubspotFromKey = SevenShores\Hubspot\Factory::create($apiKey);
+        $this->hubspotDev = SevenShores\Hubspot\Factory::create($devApiKey);
         $this->utk = $this->getUTK();
     }
 
@@ -199,13 +199,13 @@ class HubSpotService extends Component
 
 
     /**
-     * @param bool $useApiKey
+     * @param bool $developerAccount
      * @return SevenShores\Hubspot\Factory
      */
-    public function getHubspot($useApiKey = false): \SevenShores\Hubspot\Factory
+    public function getHubspot($developerAccount = false): \SevenShores\Hubspot\Factory
     {
-        if ($useApiKey) {
-            return $this->hubspotFromKey;
+        if ($developerAccount) {
+            return $this->hubspotDev;
         }
         return $this->hubspot;
     }

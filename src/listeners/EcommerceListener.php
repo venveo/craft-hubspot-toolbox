@@ -8,10 +8,10 @@ namespace venveo\hubspottoolbox\listeners;
 
 use craft\commerce\base\Purchasable;
 use craft\events\ModelEvent;
-use venveo\hubspottoolbox\entities\HubSpotSyncMessage;
+use venveo\hubspottoolbox\entities\ecommerce\ExternalSyncMessage;
+use venveo\hubspottoolbox\entities\ecommerce\SyncMessagesWithMetaData;
 use venveo\hubspottoolbox\features\EcommerceFeature;
 use venveo\hubspottoolbox\HubSpotToolbox;
-use venveo\hubspottoolbox\payloads\SyncMessages;
 
 class EcommerceListener
 {
@@ -21,8 +21,8 @@ class EcommerceListener
 
         /** @var Purchasable $purchasable */
         $purchasable = $e->sender;
-        $syncMessage = new HubSpotSyncMessage([
-            'action' => HubSpotSyncMessage::ACTION_UPSERT,
+        $syncMessage = new ExternalSyncMessage([
+            'action' => ExternalSyncMessage::ACTION_UPSERT,
             'changedAt' => (int)(microtime(true) * 1000),
             'externalObjectId' => $purchasable->id,
             'properties' => [
@@ -31,8 +31,8 @@ class EcommerceListener
                 'product_description' => $purchasable->description
             ]
         ]);
-        $payload = new SyncMessages();
-        $payload->objectType = SyncMessages::TYPE_PRODUCT;
+        $payload = new SyncMessagesWithMetaData();
+        $payload->objectType = SyncMessagesWithMetaData::TYPE_PRODUCT;
         $payload->storeId = $feature->storeId;
         $payload->addMessage($syncMessage);
 

@@ -12,19 +12,17 @@ namespace venveo\hubspottoolbox;
 
 use Craft;
 use craft\base\Plugin;
-use craft\events\RegisterComponentTypesEvent;
+use craft\commerce\elements\Variant;
+use craft\events\ModelEvent;
 use craft\events\RegisterUrlRulesEvent;
-use craft\services\Fields;
-use craft\web\twig\variables\CraftVariable;
+use craft\services\Plugins;
 use craft\web\UrlManager;
-use venveo\hubspottoolbox\fields\HubSpotFormField;
+use venveo\hubspottoolbox\listeners\EcommerceListener;
 use venveo\hubspottoolbox\models\Settings;
 use venveo\hubspottoolbox\services\FeaturesService;
 use venveo\hubspottoolbox\services\HubSpotEcommService;
 use venveo\hubspottoolbox\services\HubSpotService;
 use venveo\hubspottoolbox\services\OauthService;
-use venveo\hubspottoolbox\twigextensions\HubspotToolboxTwigExtension;
-use venveo\hubspottoolbox\variables\HubspotVariable;
 use yii\base\Event;
 
 /**
@@ -52,10 +50,6 @@ class HubSpotToolbox extends Plugin
 
     public $schemaVersion = '1.0.0';
 
-    static $devServerManifestPath = 'https://craft3-plugindev.test:3000/dist';
-    static $devServerPublicPath = 'https://craft3-plugindev.test:3000/dist/_assets';
-    static $devServerEnabled = true;
-
     /**
      */
     public function init()
@@ -71,36 +65,36 @@ class HubSpotToolbox extends Plugin
         ]);
 
         // Add in our Twig extensions
-        Craft::$app->view->registerTwigExtension(new HubspotToolboxTwigExtension());
+//        Craft::$app->view->registerTwigExtension(new HubspotToolboxTwigExtension());
 
         // Register our fields
-        Event::on(Fields::class, Fields::EVENT_REGISTER_FIELD_TYPES, function (RegisterComponentTypesEvent $event) {
-            $event->types[] = HubSpotFormField::class;
-        }
-        );
+//        Event::on(Fields::class, Fields::EVENT_REGISTER_FIELD_TYPES, function (RegisterComponentTypesEvent $event) {
+//            $event->types[] = HubSpotFormField::class;
+//        }
+//        );
 
-        Event::on(
-            UrlManager::class,
-            UrlManager::EVENT_REGISTER_CP_URL_RULES,
-            function (RegisterUrlRulesEvent $event) {
-                $event->rules['hubspot-toolbox'] = 'hubspot-toolbox/features/index';
-                $event->rules['hubspot-toolbox/features'] = 'hubspot-toolbox/features/index';
-                $event->rules['hubspot-toolbox/features/<section:{handle}>'] = 'hubspot-toolbox/features/index';
-                $event->rules['hubspot-toolbox/connection'] = 'hubspot-toolbox/connection/index';
-            }
-        );
+        Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function (RegisterUrlRulesEvent $event) {
+            $event->rules['hubspot-toolbox'] = 'hubspot-toolbox/features/index';
+            $event->rules['hubspot-toolbox/features'] = 'hubspot-toolbox/features/index';
+            $event->rules['hubspot-toolbox/features/<section:{handle}>'] = 'hubspot-toolbox/features/index';
+            $event->rules['hubspot-toolbox/connection'] = 'hubspot-toolbox/connection/index';
+        });
 
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_SITE_URL_RULES,
             function (RegisterUrlRulesEvent $event) {
                 $event->rules['api/hub/submit/<formId:\d+>'] = ['route' => 'hubspot-toolbox/form/submit'];
-            }
-        );
+            });
 
-        Event::on(CraftVariable::class, CraftVariable::EVENT_INIT, function (Event $event) {
-            $variable = $event->sender;
-            $variable->set('hubspot', HubspotVariable::class);
-        }
-        );
+        Event::on(Plugins::class, Plugins::EVENT_AFTER_LOAD_PLUGINS, function () {
+            Event::on(Variant::class, Variant::EVENT_AFTER_SAVE, function (ModelEvent $e) {
+                EcommerceListener::handlePurchasableSaved($e);
+            });
+        });
+
+//        Event::on(CraftVariable::class, CraftVariable::EVENT_INIT, function (Event $event) {
+//            $variable = $event->sender;
+//            $variable->set('hubspot', HubspotVariable::class);
+//        });
     }
 
     /**

@@ -34,6 +34,7 @@ class Settings extends Model
     public $clientId = '';
     public $clientSecret = '';
     public $apiKey = '';
+    public $devApiKey = '';
 
 
     public function behaviors()
@@ -46,6 +47,7 @@ class Settings extends Model
                 'clientId',
                 'clientSecret',
                 'apiKey',
+                'devApiKey',
             ],
         ];
         return $behaviors;
@@ -57,7 +59,7 @@ class Settings extends Model
     public function rules()
     {
         return [
-            [['appId', 'clientId', 'clientSecret', 'apiKey'], 'required']
+            [['appId', 'clientId', 'clientSecret', 'devApiKey'], 'required']
         ];
     }
 }

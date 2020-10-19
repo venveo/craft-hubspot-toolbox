@@ -1,12 +1,18 @@
 <?php
+/*
+ *  @link      https://www.venveo.com
+ *  @copyright Copyright (c) 2020 Venveo
+ */
 
-namespace venveo\hubspottoolbox\entities;
+namespace venveo\hubspottoolbox\entities\ecommerce;
+
+use venveo\hubspottoolbox\entities\HubSpotEntity;
 
 /**
  * Class HubSpotSyncMessage
  * @package venveo\hubspottoolbox\entities
  */
-class HubSpotSyncMessage extends HubSpotEntity
+class ExternalSyncMessage extends HubSpotEntity
 {
     public const ACTION_UPSERT = 'UPSERT';
     public const ACTION_DELETE = 'DELETE';

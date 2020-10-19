@@ -32,11 +32,12 @@
 }) }}
 
 {{ forms.autosuggestField({
-    label: "HubSpot Portal API Key"|t('hubspot-toolbox'),
-    id: 'apiKey',
-    name: 'apiKey',
+    label: "HubSpot Developer API Key"|t('hubspot-toolbox'),
+    instructions: "Enter the API key for your developer account that has access to the OAuth app. This is NOT the portal API key."|t('hubspot-toolbox'),
+    id: 'devApiKey',
+    name: 'devApiKey',
     required: true,
-    errors: settings.getErrors('apiKey'),
-    value: settings.apiKey,
+    errors: settings.getErrors('devApiKey'),
+    value: settings.devApiKey,
     suggestEnvVars: true
 }) }}

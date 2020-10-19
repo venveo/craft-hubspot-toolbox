@@ -31,7 +31,8 @@ class FeaturesController extends Controller
         ]);
     }
 
-    public function actionSave() {
+    public function actionSave()
+    {
         $this->requirePostRequest();
         $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle(\Craft::$app->request->getRequiredBodyParam('feature'));
         $settings = \Craft::$app->request->getRequiredBodyParam('settings');

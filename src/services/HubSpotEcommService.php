@@ -11,12 +11,11 @@
 namespace venveo\hubspottoolbox\services;
 
 use craft\base\Component;
-use craft\helpers\UrlHelper;
 use SevenShores\Hubspot\Exceptions\BadRequest;
 use SevenShores\Hubspot\Exceptions\HubspotException;
+use venveo\hubspottoolbox\entities\ecommerce\Store;
+use venveo\hubspottoolbox\entities\ecommerce\SyncMessagesWithMetaData;
 use venveo\hubspottoolbox\HubSpotToolbox;
-use venveo\hubspottoolbox\entities\HubSpotStore;
-use venveo\hubspottoolbox\payloads\SyncMessages;
 
 /**
  */
@@ -35,14 +34,15 @@ class HubSpotEcommService extends Component
 
     public function getStores()
     {
+//        \Craft::dd($this->getMappingSettings());
 //        $this->saveMappingSettings();
         $results = $this->hs->ecommerceBridge()->allStores()->getData()->results;
         return array_map(function ($item) {
-            return new HubSpotStore($item);
+            return new Store($item);
         }, $results);
     }
 
-    public function saveStore(HubSpotStore $store)
+    public function saveStore(Store $store)
     {
         try {
             $updatedStore = $this->hs->ecommerceBridge()->createOrUpdateStore($store->toArray());
@@ -55,81 +55,18 @@ class HubSpotEcommService extends Component
         return true;
     }
 
-    public function getMappingSettings() {
-        $hs = HubSpotToolbox::$plugin->hubspot->getHubspot(true);
-
-        try {
-            $results = $hs->ecommerceBridge()->getSettings();
-        } catch (BadRequest $e) {
-            if ($e->getCode() === 404) {
-                return [];
-            } else {
-                throw $e;
-            }
-        }
-        return $results->getData();
-    }
-
-    public function saveMappingSettings() {
-        $hs = HubSpotToolbox::$plugin->hubspot->getHubspot(true);
-        try {
-            $response = $hs->ecommerceBridge()->upsertSettings([
-                'enabled' => true,
-                'webhookUri' => UrlHelper::actionUrl('hubspot-toolbox/ecommerce-import/webhook-import'),
-                'mappings' => [
-                    'CONTACT' => [
-                        'properties' => [
-                            [
-                                'externalPropertyName' => 'firstname',
-                                'hubspotPropertyName' => 'firstname',
-                                'dataType' => 'STRING',
-                            ],
-                            [
-                                'externalPropertyName' => 'email',
-                                'hubspotPropertyName' => 'email',
-                                'dataType' => 'STRING',
-                            ]
-                        ],
-                    ],
-                    'PRODUCT' => [
-                        'properties' => [
-                            [
-                                'externalPropertyName' => 'firstname',
-                                'hubspotPropertyName' => 'firstname',
-                                'dataType' => 'STRING',
-                            ]
-                        ]
-                    ],
-                    'DEAL' => [
-                        'properties' => [
-                            [
-                                'externalPropertyName' => 'hubspotdealstage',
-                                'hubspotPropertyName' => 'dealstage',
-                                'dataType' => 'STRING',
-                            ]
-                        ]
-                    ],
-                    'LINE_ITEM' => [
-                        'properties' => [
-                            [
-                                'externalPropertyName' => 'total',
-                                'hubspotPropertyName' => 'price',
-                                'dataType' => 'NUMBER',
-                            ]
-                        ]
-                    ]
-                ]
-            ]);
-        } catch (HubspotException $e) {
-            \Craft::dd($e->getResponse()->getBody()->getContents());
-        }
-    }
-
-    public function sendSyncMessages(SyncMessages $syncMessages) {
+    public function sendSyncMessages(SyncMessagesWithMetaData $syncMessages)
+    {
         if (!$syncMessages->validate()) {
             return false;
         }
-        $this->hs->ecommerceBridge()->sendSyncMessages($syncMessages->storeId, $syncMessages->objectType, $syncMessages->messages);
+        try {
+            $this->hs->ecommerceBridge()->sendSyncMessages($syncMessages->storeId, $syncMessages->objectType,
+                $syncMessages->getMessagesPayload());
+        } catch (HubspotException $exception) {
+            throw $exception;
+//            \Craft::dd($exception->getResponse()->getBody()->getContents());
+        }
         return true;
     }
 }
