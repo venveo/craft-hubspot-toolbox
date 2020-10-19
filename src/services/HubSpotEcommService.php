@@ -17,32 +17,26 @@ use venveo\hubspottoolbox\entities\ecommerce\Store;
 use venveo\hubspottoolbox\entities\ecommerce\SyncMessagesWithMetaData;
 use venveo\hubspottoolbox\HubSpotToolbox;
 
-/**
- */
 class HubSpotEcommService extends Component
 {
-    private $stores = null;
-
     /** @var \SevenShores\Hubspot\Factory $hs */
     private $hs = null;
 
     public function init()
     {
-        $this->hs = HubSpotToolbox::$plugin->hubspot->getHubspot();
         parent::init();
+        $this->hs = HubSpotToolbox::$plugin->hubspot->getHubspot();
     }
 
     public function getStores()
     {
-//        \Craft::dd($this->getMappingSettings());
-//        $this->saveMappingSettings();
         $results = $this->hs->ecommerceBridge()->allStores()->getData()->results;
         return array_map(function ($item) {
             return new Store($item);
         }, $results);
     }
 
-    public function saveStore(Store $store)
+    public function saveStore(Store $store): bool
     {
         try {
             $updatedStore = $this->hs->ecommerceBridge()->createOrUpdateStore($store->toArray());
@@ -55,7 +49,7 @@ class HubSpotEcommService extends Component
         return true;
     }
 
-    public function sendSyncMessages(SyncMessagesWithMetaData $syncMessages)
+    public function sendSyncMessages(SyncMessagesWithMetaData $syncMessages): bool
     {
         if (!$syncMessages->validate()) {
             return false;

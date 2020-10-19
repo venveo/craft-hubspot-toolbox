@@ -21,6 +21,7 @@ use venveo\hubspottoolbox\listeners\EcommerceListener;
 use venveo\hubspottoolbox\models\Settings;
 use venveo\hubspottoolbox\services\FeaturesService;
 use venveo\hubspottoolbox\services\HubSpotEcommService;
+use venveo\hubspottoolbox\services\HubSpotEcommSettingsService;
 use venveo\hubspottoolbox\services\HubSpotService;
 use venveo\hubspottoolbox\services\OauthService;
 use yii\base\Event;
@@ -34,6 +35,7 @@ use yii\base\Event;
  * @property  OauthService $oauth
  * @property  FeaturesService $features
  * @property  HubSpotEcommService $ecomm
+ * @property  HubSpotEcommSettingsService $ecommSettings
  * @property-read array $cpNavItem
  * @property  Settings $settings
  * @method    Settings getSettings()
@@ -60,6 +62,7 @@ class HubSpotToolbox extends Plugin
         $this->setComponents([
             'hubspot' => HubSpotService::class,
             'ecomm' => HubSpotEcommService::class,
+            'ecommSettings' => HubSpotEcommSettingsService::class,
             'oauth' => OauthService::class,
             'features' => FeaturesService::class
         ]);

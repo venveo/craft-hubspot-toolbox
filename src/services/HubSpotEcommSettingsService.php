@@ -12,7 +12,6 @@ namespace venveo\hubspottoolbox\services;
 
 use craft\base\Component;
 use SevenShores\Hubspot\Exceptions\HubspotException;
-use venveo\hubspottoolbox\entities\ecommerce\SyncMessagesWithMetaData;
 use venveo\hubspottoolbox\HubSpotToolbox;
 
 /**
