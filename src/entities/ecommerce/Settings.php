@@ -17,18 +17,23 @@ use venveo\hubspottoolbox\validators\EmbeddedModelValidator;
 class Settings extends HubSpotEntity
 {
     public bool $enabled;
-    public string $webhookUri;
+    public ?string $webhookUri = null;
     /**
      * @var <ExternalSyncSettings>[]
      */
-    public array $externalSyncSettings;
+    public array $mappings = [];
 
     protected function defineRules(): array
     {
         $rules = parent::defineRules();
         $rules[] = [['enabled', 'mappings'], 'required'];
         $rules[] = ['webhookUri', UriValidator::class];
-        $rules[] = ['externalSyncSettings', 'each', 'rule' => [EmbeddedModelValidator::class]];
+        $rules[] = ['mappings', 'each', 'rule' => [EmbeddedModelValidator::class]];
         return $rules;
+    }
+
+    public function setObjectSettings($objectType, ExternalSyncSettings $settings)
+    {
+        $this->mappings[$objectType] = $settings;
     }
 }

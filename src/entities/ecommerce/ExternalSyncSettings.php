@@ -17,12 +17,17 @@ class ExternalSyncSettings extends HubSpotEntity
     /**
      * @var <ExternalPropertyMapping>[]
      */
-    public array $properties;
+    public array $properties = [];
 
     protected function defineRules(): array
     {
         $rules = parent::defineRules();
         $rules[] = ['properties', 'each', 'rule' => [EmbeddedModelValidator::class]];
         return $rules;
+    }
+
+    public function addPropertyMapping(ExternalPropertyMapping $mapping)
+    {
+        $this->properties[] = $mapping;
     }
 }
