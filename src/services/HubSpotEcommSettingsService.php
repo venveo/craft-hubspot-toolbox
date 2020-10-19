@@ -12,6 +12,9 @@ namespace venveo\hubspottoolbox\services;
 
 use craft\base\Component;
 use SevenShores\Hubspot\Exceptions\HubspotException;
+use venveo\hubspottoolbox\entities\ecommerce\ExternalPropertyMapping;
+use venveo\hubspottoolbox\entities\ecommerce\ExternalSyncSettings;
+use venveo\hubspottoolbox\entities\ecommerce\Settings as EcommerceBridgeSettings;
 use venveo\hubspottoolbox\HubSpotToolbox;
 
 /**
@@ -42,199 +45,121 @@ class HubSpotEcommSettingsService extends Component
         return $results->getData();
     }
 
+    protected function getContactProperties(): ExternalSyncSettings
+    {
+        $props = [];
+        $props[] = new ExternalPropertyMapping('email', 'email',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('firstname', 'firstname',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('lastname', 'lastname',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('billing_company', 'billing_company',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('billing_phone', 'billing_phone',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('billing_mobile', 'billing_mobile',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('billing_address_1', 'billing_address_1',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('billing_city', 'billing_city',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('billing_state', 'billing_state',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('billing_country', 'billing_country',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('billing_postcode', 'billing_postcode',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+
+        return new ExternalSyncSettings([
+            'properties' => $props
+        ]);
+    }
+
+    protected function getProductProperties(): ExternalSyncSettings
+    {
+        $props = [];
+        $props[] = new ExternalPropertyMapping('product_name', 'name',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('product_image_url', 'ip__ecomm_bridge__image_url',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('product_price', 'price',
+            ExternalPropertyMapping::DATA_TYPE_NUMBER);
+        $props[] = new ExternalPropertyMapping('product_description', 'description',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+
+        return new ExternalSyncSettings([
+            'properties' => $props
+        ]);
+    }
+
+    protected function getDealProperties(): ExternalSyncSettings
+    {
+        $props = [];
+        $props[] = new ExternalPropertyMapping('dealstage', 'dealstage',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('dealname', 'dealname',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('closedate', 'closedate',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('order_date', 'createdate',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('order_amount', 'amount',
+            ExternalPropertyMapping::DATA_TYPE_NUMBER);
+        $props[] = new ExternalPropertyMapping('order_abandoned_cart_url', 'ip__ecomm_bridge__abandoned_cart_url',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('order_discount_amount', 'ip__ecomm_bridge__discount_amount',
+            ExternalPropertyMapping::DATA_TYPE_NUMBER);
+        $props[] = new ExternalPropertyMapping('order_id', 'ip__ecomm_bridge__order_number',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('order_shipment_ids', 'ip__ecomm_bridge__shipment_ids',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('order_tax_amount', 'ip__ecomm_bridge__tax_amount',
+            ExternalPropertyMapping::DATA_TYPE_NUMBER);
+        $props[] = new ExternalPropertyMapping('customer_note', 'description',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+
+        return new ExternalSyncSettings([
+            'properties' => $props
+        ]);
+    }
+
+    protected function getLineItemProperties(): ExternalSyncSettings
+    {
+        $props = [];
+        $props[] = new ExternalPropertyMapping('discount_amount', 'discount',
+            ExternalPropertyMapping::DATA_TYPE_NUMBER);
+        $props[] = new ExternalPropertyMapping('quantity', 'quantity',
+            ExternalPropertyMapping::DATA_TYPE_NUMBER);
+        $props[] = new ExternalPropertyMapping('name', 'name',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('price', 'price',
+            ExternalPropertyMapping::DATA_TYPE_NUMBER);
+        $props[] = new ExternalPropertyMapping('description', 'description',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('amount', 'amount',
+            ExternalPropertyMapping::DATA_TYPE_NUMBER);
+        $props[] = new ExternalPropertyMapping('tax_amount', 'tax_amount',
+            ExternalPropertyMapping::DATA_TYPE_NUMBER);
+
+        return new ExternalSyncSettings([
+            'properties' => $props
+        ]);
+    }
+
     public function saveMappingSettings()
     {
+//        UrlHelper::actionUrl('hubspot-toolbox/ecommerce-import/webhook-import')
+        $settings = new EcommerceBridgeSettings();
+        $settings->webhookUri = 'https://a8df854fa34c.ngrok.io/hubspot-toolbox/ecommerce-import/webhook-import';
+        $settings->enabled = true;
+        $settings->setObjectSettings('CONTACT', $this->getContactProperties());
+        $settings->setObjectSettings('PRODUCT', $this->getProductProperties());
+        $settings->setObjectSettings('DEAL', $this->getDealProperties());
+        $settings->setObjectSettings('LINE_ITEM', $this->getLineItemProperties());
         try {
-            $response = $this->hs->ecommerceBridge()->upsertSettings([
-                'enabled' => true,
-//                'webhookUri' => UrlHelper::actionUrl('hubspot-toolbox/ecommerce-import/webhook-import'),
-                'webhookUri' => null,
-                'mappings' => [
-                    'CONTACT' => [
-                        'properties' => [
-                            [
-                                'externalPropertyName' => 'email',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'email',
-                            ],
-                            [
-                                'externalPropertyName' => 'firstname',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'firstname',
-                            ],
-                            [
-                                'externalPropertyName' => 'lastname',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'lastname',
-                            ],
-                            [
-                                'externalPropertyName' => 'billing_company',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'company',
-                            ],
-                            [
-                                'externalPropertyName' => 'billing_phone',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'phone',
-                            ],
-                            [
-                                'externalPropertyName' => 'billing_mobile',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'mobilephone',
-                            ],
-                            [
-                                'externalPropertyName' => 'billing_address_1',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'address',
-                            ],
-                            [
-                                'externalPropertyName' => 'billing_city',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'city',
-                            ],
-                            [
-                                'externalPropertyName' => 'billing_state',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'state',
-                            ],
-                            [
-                                'externalPropertyName' => 'billing_country',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'country',
-                            ],
-                            [
-                                'externalPropertyName' => 'billing_postcode',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'zip',
-                            ],
-
-                        ],
-                    ],
-                    'PRODUCT' => [
-                        'properties' => [
-                            [
-                                'externalPropertyName' => 'product_name',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'name',
-                            ],
-                            [
-                                'externalPropertyName' => 'product_image_url',
-                                'dataType' => 'AVATAR_IMAGE',
-                                'hubspotPropertyName' => 'ip__ecomm_bridge__image_url',
-                            ],
-                            [
-                                'externalPropertyName' => 'product_price',
-                                'dataType' => 'NUMBER',
-                                'hubspotPropertyName' => 'price',
-                            ],
-                            [
-                                'externalPropertyName' => 'product_description',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'description',
-                            ],
-                        ]
-                    ],
-                    'DEAL' => [
-                        'properties' => [
-                            [
-                                'externalPropertyName' => 'dealstage',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'dealstage',
-                            ],
-                            [
-                                'externalPropertyName' => 'dealname',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'dealname',
-                            ],
-                            [
-                                'externalPropertyName' => 'closedate',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'closedate',
-                            ],
-                            [
-                                'externalPropertyName' => 'order_date',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'createdate',
-                            ],
-                            [
-                                'externalPropertyName' => 'order_amount',
-                                'dataType' => 'NUMBER',
-                                'hubspotPropertyName' => 'amount',
-                            ],
-                            [
-                                'externalPropertyName' => 'order_abandoned_cart_url',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'ip__ecomm_bridge__abandoned_cart_url',
-                            ],
-                            [
-                                'externalPropertyName' => 'order_discount_amount',
-                                'dataType' => 'NUMBER',
-                                'hubspotPropertyName' => 'ip__ecomm_bridge__discount_amount',
-                            ],
-                            [
-                                'externalPropertyName' => 'order_id',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'ip__ecomm_bridge__order_number',
-                            ],
-                            [
-                                'externalPropertyName' => 'order_shipment_ids',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'ip__ecomm_bridge__shipment_ids',
-                            ],
-                            [
-                                'externalPropertyName' => 'order_tax_amount',
-                                'dataType' => 'NUMBER',
-                                'hubspotPropertyName' => 'ip__ecomm_bridge__tax_amount',
-                            ],
-                            [
-                                'externalPropertyName' => 'customer_note',
-                                'dataType' => 'NUMBER',
-                                'hubspotPropertyName' => 'description',
-                            ],
-                        ]
-                    ],
-                    'LINE_ITEM' => [
-                        'properties' => [
-                            [
-                                'externalPropertyName' => 'discount_amount',
-                                'dataType' => 'NUMBER',
-                                'hubspotPropertyName' => 'discount',
-                            ],
-                            [
-                                'externalPropertyName' => 'quantity',
-                                'dataType' => 'NUMBER',
-                                'hubspotPropertyName' => 'quantity',
-                            ],
-                            [
-                                'externalPropertyName' => 'name',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'name',
-                            ],
-                            [
-                                'externalPropertyName' => 'price',
-                                'dataType' => 'NUMBER',
-                                'hubspotPropertyName' => 'price',
-                            ],
-                            [
-                                'externalPropertyName' => 'sku',
-                                'dataType' => 'STRING',
-                                'hubspotPropertyName' => 'description',
-                            ],
-                            [
-                                'externalPropertyName' => 'amount',
-                                'dataType' => 'NUMBER',
-                                'hubspotPropertyName' => 'amount',
-                            ],
-                            [
-                                'externalPropertyName' => 'tax_amount',
-                                'dataType' => 'NUMBER',
-                                'hubspotPropertyName' => 'tax',
-                            ],
-                        ]
-                    ]
-                ]
-            ], ['appId' => $this->appId]);
-            \Craft::dd($response->getBody()->getContents());
+            $response = $this->hs->ecommerceBridge()->upsertSettings($settings->prepareForApi(),
+                ['appId' => $this->appId]);
         } catch (HubspotException $e) {
             \Craft::dd($e->getResponse()->getBody()->getContents());
         }
