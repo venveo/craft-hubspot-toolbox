@@ -9,7 +9,6 @@ use venveo\hubspottoolbox\HubSpotToolbox;
 use venveo\hubspottoolbox\oauth\providers\HubSpot;
 use venveo\hubspottoolbox\oauth\providers\HubSpotResourceOwner;
 use venveo\hubspottoolbox\services\OauthService;
-use yii\web\BadRequestHttpException;
 use yii\web\Response;
 
 /**
@@ -27,11 +26,18 @@ class ConnectionController extends Controller
         parent::init();
     }
 
-    public function actionAuthorize() {
+    public function actionAuthorize()
+    {
         return $this->provider->authorize(['scope' => OauthService::$scopes], function ($url, $provider) {
             Craft::$app->session->set('oauth2state', $provider->getState());
             return Craft::$app->response->redirect($url);
         });
+    }
+
+    public function actionDeauthorize()
+    {
+        HubSpotToolbox::$plugin->oauth->deleteToken();
+        return $this->redirect(UrlHelper::cpUrl('hubspot-toolbox/connection'));
     }
 
 
@@ -57,7 +63,8 @@ class ConnectionController extends Controller
         ]);
         /** @var HubSpotResourceOwner $resourceOwner */
         $resourceOwner = $this->provider->getResourceOwner($accessToken);
-        $tokenModel = HubSpotToolbox::$plugin->oauth->convertLeagueTokenToModel($accessToken, $resourceOwner->getHubId(), $resourceOwner->getAppId());
+        $tokenModel = HubSpotToolbox::$plugin->oauth->convertLeagueTokenToModel($accessToken,
+            $resourceOwner->getHubId(), $resourceOwner->getAppId());
         HubSpotToolbox::$plugin->oauth->saveToken($tokenModel);
 
         Craft::$app->session->setNotice('Connected to HubSpot Account');

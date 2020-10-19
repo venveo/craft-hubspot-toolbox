@@ -33,5 +33,8 @@
         <p>Click the "Connect" button to get your first token!</p>
     {% endif %}
     <hr>
-    <a href="{{ actionUrl('hubspot-toolbox/connection/authorize') }}" class="btn">Connect</a>
+    {% if token and resourceOwner %}
+        <a href="{{ actionUrl('hubspot-toolbox/connection/deauthorize') }}" class="btn">Disconnect</a>
+    {% endif %}
+    <a href="{{ actionUrl('hubspot-toolbox/connection/authorize') }}" class="btn submit">Connect</a>
 {% endset %}
