@@ -14,10 +14,7 @@ use Craft;
 use craft\base\Component;
 use SevenShores;
 use venveo\hubspottoolbox\HubSpotToolbox;
-use venveo\hubspottoolbox\entities\HubSpotApp;
-use venveo\hubspottoolbox\entities\HubSpotForm;
-use venveo\hubspottoolbox\entities\HubSpotFormSubmission;
-use venveo\hubspottoolbox\entities\Settings;
+use venveo\hubspottoolbox\models\Settings;
 use venveo\hubspottoolbox\records\HubSpotFormRecord;
 
 /**

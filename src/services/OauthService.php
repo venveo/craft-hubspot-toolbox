@@ -6,11 +6,12 @@ use Craft;
 use craft\base\Component;
 use craft\helpers\UrlHelper;
 use DateTime;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use venveo\hubspottoolbox\HubSpotToolbox;
-use venveo\hubspottoolbox\entities\HubSpotToken;
-use venveo\hubspottoolbox\entities\HubSpotToken as HubSpotTokenModel;
-use venveo\hubspottoolbox\entities\Settings;
+use venveo\hubspottoolbox\models\HubSpotToken;
+use venveo\hubspottoolbox\models\HubSpotToken as HubSpotTokenModel;
+use venveo\hubspottoolbox\models\Settings;
 use venveo\hubspottoolbox\oauth\providers\HubSpot as HubSpotProvider;
 use venveo\hubspottoolbox\records\HubSpotToken as HubSpotTokenRecord;
 
@@ -36,10 +37,10 @@ class OauthService extends Component
 
     public function init()
     {
+        parent::init();
+
         /** @var Settings settings */
         $this->settings = HubSpotToolbox::$plugin->getSettings();
-
-        parent::init();
     }
 
     /**
@@ -110,12 +111,17 @@ class OauthService extends Component
 
     public function refreshToken(HubSpotToken $oldToken)
     {
-        $accessToken = $this->provider->getAccessToken('refresh_token', [
-            'refresh_token' => $oldToken->refreshToken
-        ]);
+        try {
+            $accessToken = $this->provider->getAccessToken('refresh_token', [
+                'refresh_token' => $oldToken->refreshToken
+            ]);
 
-        $newToken = $this->convertLeagueTokenToModel($accessToken, $oldToken->hubId, $oldToken->appId);
-        $this->saveToken($newToken);
+            $newToken = $this->convertLeagueTokenToModel($accessToken, $oldToken->hubId, $oldToken->appId);
+            $this->saveToken($newToken);
+        } catch (IdentityProviderException $exception) {
+            $this->deleteToken();
+            return null;
+        }
         return $newToken;
     }
 

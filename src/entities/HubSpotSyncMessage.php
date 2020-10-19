@@ -2,15 +2,18 @@
 
 namespace venveo\hubspottoolbox\entities;
 
-
-const ACTION_UPSERT = 'UPSERT';
-const ACTION_DELETE = 'DELETE';
-
+/**
+ * Class HubSpotSyncMessage
+ * @package venveo\hubspottoolbox\entities
+ */
 class HubSpotSyncMessage extends HubSpotEntity
 {
-    public $action = ACTION_UPSERT;
-    public $changedAt = null;
-    public $externalObjectId = null;
+    public const ACTION_UPSERT = 'UPSERT';
+    public const ACTION_DELETE = 'DELETE';
+
+    public string $action = self::ACTION_UPSERT;
+    public ?string $changedAt = null;
+    public string $externalObjectId = '';
     public array $properties = [];
     public array $associations = [];
 
@@ -18,7 +21,7 @@ class HubSpotSyncMessage extends HubSpotEntity
     {
         $rules = parent::defineRules();
         $rules[] = [['action', 'externalObjectId', 'properties'], 'required'];
-        $rules[] = ['action', 'in', 'range' => [ACTION_UPSERT, ACTION_DELETE]];
+        $rules[] = ['action', 'in', 'range' => [self::ACTION_UPSERT, self::ACTION_DELETE]];
         return $rules;
     }
 }
