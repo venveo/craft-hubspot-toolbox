@@ -1,6 +1,6 @@
 <?php
 
-namespace venveo\hubspottoolbox\requests;
+namespace venveo\hubspottoolbox\payloads;
 
 use craft\base\Model;
 

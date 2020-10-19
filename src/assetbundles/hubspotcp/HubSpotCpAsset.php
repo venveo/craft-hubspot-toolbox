@@ -57,6 +57,6 @@ class HubSpotCpAsset extends AssetBundle
      */
     private static function getDevServer(): string
     {
-        return 'http://craft3-plugindev.test:8080/dist';
+        return 'https://craft3-plugindev.test:8080/dist';
     }
 }
