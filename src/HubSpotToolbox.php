@@ -12,6 +12,7 @@ namespace venveo\hubspottoolbox;
 
 use Craft;
 use craft\base\Plugin;
+use craft\commerce\elements\Order;
 use craft\commerce\elements\Variant;
 use craft\events\ModelEvent;
 use craft\events\RegisterUrlRulesEvent;
@@ -20,8 +21,8 @@ use craft\web\UrlManager;
 use venveo\hubspottoolbox\listeners\EcommerceListener;
 use venveo\hubspottoolbox\models\Settings;
 use venveo\hubspottoolbox\services\FeaturesService;
-use venveo\hubspottoolbox\services\HubSpotEcommService;
-use venveo\hubspottoolbox\services\HubSpotEcommSettingsService;
+use venveo\hubspottoolbox\services\hubspot\EcommService;
+use venveo\hubspottoolbox\services\hubspot\EcommSettingsService;
 use venveo\hubspottoolbox\services\HubSpotService;
 use venveo\hubspottoolbox\services\OauthService;
 use yii\base\Event;
@@ -34,8 +35,8 @@ use yii\base\Event;
  * @property  HubSpotService $hubspot
  * @property  OauthService $oauth
  * @property  FeaturesService $features
- * @property  HubSpotEcommService $ecomm
- * @property  HubSpotEcommSettingsService $ecommSettings
+ * @property  EcommService $ecomm
+ * @property  EcommSettingsService $ecommSettings
  * @property-read array $cpNavItem
  * @property  Settings $settings
  * @method    Settings getSettings()
@@ -52,8 +53,6 @@ class HubSpotToolbox extends Plugin
 
     public $schemaVersion = '1.0.0';
 
-    /**
-     */
     public function init()
     {
         parent::init();
@@ -61,8 +60,8 @@ class HubSpotToolbox extends Plugin
 
         $this->setComponents([
             'hubspot' => HubSpotService::class,
-            'ecomm' => HubSpotEcommService::class,
-            'ecommSettings' => HubSpotEcommSettingsService::class,
+            'ecomm' => EcommService::class,
+            'ecommSettings' => EcommSettingsService::class,
             'oauth' => OauthService::class,
             'features' => FeaturesService::class
         ]);
@@ -91,6 +90,10 @@ class HubSpotToolbox extends Plugin
         Event::on(Plugins::class, Plugins::EVENT_AFTER_LOAD_PLUGINS, function () {
             Event::on(Variant::class, Variant::EVENT_AFTER_SAVE, function (ModelEvent $e) {
                 EcommerceListener::handlePurchasableSaved($e);
+            });
+
+            Event::on(Order::class, Order::EVENT_AFTER_SAVE, function (ModelEvent $e) {
+                EcommerceListener::handleOrderSaved($e);
             });
         });
 

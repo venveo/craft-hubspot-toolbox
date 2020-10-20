@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2018 Venveo
  */
 
-namespace venveo\hubspottoolbox\services;
+namespace venveo\hubspottoolbox\services\hubspot;
 
 use craft\base\Component;
 use SevenShores\Hubspot\Exceptions\HubspotException;
@@ -19,7 +19,7 @@ use venveo\hubspottoolbox\HubSpotToolbox;
 
 /**
  */
-class HubSpotEcommSettingsService extends Component
+class EcommSettingsService extends Component
 {
     /** @var \SevenShores\Hubspot\Factory $hs */
     private $hs = null;
@@ -80,6 +80,8 @@ class HubSpotEcommSettingsService extends Component
     {
         $props = [];
         $props[] = new ExternalPropertyMapping('product_name', 'name',
+            ExternalPropertyMapping::DATA_TYPE_STRING);
+        $props[] = new ExternalPropertyMapping('sku', 'hs_sku',
             ExternalPropertyMapping::DATA_TYPE_STRING);
         $props[] = new ExternalPropertyMapping('product_image_url', 'ip__ecomm_bridge__image_url',
             ExternalPropertyMapping::DATA_TYPE_STRING);

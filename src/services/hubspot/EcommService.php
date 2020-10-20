@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2018 Venveo
  */
 
-namespace venveo\hubspottoolbox\services;
+namespace venveo\hubspottoolbox\services\hubspot;
 
 use craft\base\Component;
 use SevenShores\Hubspot\Exceptions\BadRequest;
@@ -17,7 +17,7 @@ use venveo\hubspottoolbox\entities\ecommerce\Store;
 use venveo\hubspottoolbox\entities\ecommerce\SyncMessagesWithMetaData;
 use venveo\hubspottoolbox\HubSpotToolbox;
 
-class HubSpotEcommService extends Component
+class EcommService extends Component
 {
     /** @var \SevenShores\Hubspot\Factory $hs */
     private $hs = null;
@@ -31,6 +31,7 @@ class HubSpotEcommService extends Component
     public function getStores()
     {
 //        HubSpotToolbox::$plugin->ecommSettings->saveMappingSettings();
+//        \Craft::dd($this->hs->objectProperties('products')->all());
         $results = $this->hs->ecommerceBridge()->allStores()->getData()->results;
         return array_map(function ($item) {
             return new Store($item);
