@@ -13,7 +13,7 @@ namespace venveo\hubspottoolbox\variables;
 use venveo\hubspottoolbox\HubSpotToolbox;
 
 use Craft;
-use venveo\hubspottoolbox\services\HubSpotService;
+use venveo\hubspottoolbox\services\hubspot\ContactsService;
 
 /**
  * HubSpot Toolbox Variable

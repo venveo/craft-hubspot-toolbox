@@ -48,6 +48,7 @@ class EcommerceListener
         if ($e->isNew) {
             return null;
         }
+        /** @var EcommerceFeature $feature */
         $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
 
         /** @var Order $order */

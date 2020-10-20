@@ -15,24 +15,17 @@ use SevenShores\Hubspot\Exceptions\BadRequest;
 use SevenShores\Hubspot\Exceptions\HubspotException;
 use venveo\hubspottoolbox\entities\ecommerce\Store;
 use venveo\hubspottoolbox\entities\ecommerce\SyncMessagesWithMetaData;
-use venveo\hubspottoolbox\HubSpotToolbox;
+use venveo\hubspottoolbox\traits\HubSpotTokenAuthorization;
 
 class EcommService extends Component
 {
-    /** @var \SevenShores\Hubspot\Factory $hs */
-    private $hs = null;
-
-    public function init()
-    {
-        parent::init();
-        $this->hs = HubSpotToolbox::$plugin->hubspot->getHubspot();
-    }
+    use HubSpotTokenAuthorization;
 
     public function getStores()
     {
 //        HubSpotToolbox::$plugin->ecommSettings->saveMappingSettings();
 //        \Craft::dd($this->hs->objectProperties('products')->all());
-        $results = $this->hs->ecommerceBridge()->allStores()->getData()->results;
+        $results = $this->getHubSpot()->ecommerceBridge()->allStores()->getData()->results;
         return array_map(function ($item) {
             return new Store($item);
         }, $results);
@@ -41,7 +34,7 @@ class EcommService extends Component
     public function saveStore(Store $store): bool
     {
         try {
-            $updatedStore = $this->hs->ecommerceBridge()->createOrUpdateStore($store->toArray());
+            $updatedStore = $this->getHubSpot()->ecommerceBridge()->createOrUpdateStore($store->toArray());
         } catch (BadRequest $e) {
             $store->addError('storeId', $e->getMessage());
             return false;
@@ -57,7 +50,7 @@ class EcommService extends Component
             return false;
         }
         try {
-            $this->hs->ecommerceBridge()->sendSyncMessages($syncMessages->storeId, $syncMessages->objectType,
+            $this->getHubSpot()->ecommerceBridge()->sendSyncMessages($syncMessages->storeId, $syncMessages->objectType,
                 $syncMessages->getMessagesPayload());
         } catch (HubspotException $exception) {
             throw $exception;

@@ -23,7 +23,6 @@ use venveo\hubspottoolbox\models\Settings;
 use venveo\hubspottoolbox\services\FeaturesService;
 use venveo\hubspottoolbox\services\hubspot\EcommService;
 use venveo\hubspottoolbox\services\hubspot\EcommSettingsService;
-use venveo\hubspottoolbox\services\HubSpotService;
 use venveo\hubspottoolbox\services\OauthService;
 use yii\base\Event;
 
@@ -32,7 +31,6 @@ use yii\base\Event;
  * @package   HubspotToolbox
  * @since     1.0.0
  *
- * @property  HubSpotService $hubspot
  * @property  OauthService $oauth
  * @property  FeaturesService $features
  * @property  EcommService $ecomm
@@ -59,7 +57,7 @@ class HubSpotToolbox extends Plugin
         self::$plugin = $this;
 
         $this->setComponents([
-            'hubspot' => HubSpotService::class,
+//            'hubspot' => ContactsService::class,
             'ecomm' => EcommService::class,
             'ecommSettings' => EcommSettingsService::class,
             'oauth' => OauthService::class,
@@ -82,10 +80,10 @@ class HubSpotToolbox extends Plugin
             $event->rules['hubspot-toolbox/connection'] = 'hubspot-toolbox/connection/index';
         });
 
-        Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_SITE_URL_RULES,
-            function (RegisterUrlRulesEvent $event) {
-                $event->rules['api/hub/submit/<formId:\d+>'] = ['route' => 'hubspot-toolbox/form/submit'];
-            });
+//        Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_SITE_URL_RULES,
+//            function (RegisterUrlRulesEvent $event) {
+//                $event->rules['api/hub/submit/<formId:\d+>'] = ['route' => 'hubspot-toolbox/form/submit'];
+//            });
 
         Event::on(Plugins::class, Plugins::EVENT_AFTER_LOAD_PLUGINS, function () {
             Event::on(Variant::class, Variant::EVENT_AFTER_SAVE, function (ModelEvent $e) {
