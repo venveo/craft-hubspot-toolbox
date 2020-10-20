@@ -24,16 +24,6 @@ class ExternalObjectStatus extends HubSpotEntity
     {
         $rules = parent::defineRules();
         $rules[] = [['storeId', 'objectType', 'externalObjectId', 'lastProcessedAt'], 'required'];
-        $rules[] = [
-            'dataType',
-            'in',
-            'range' => [
-                self::DATA_TYPE_STRING,
-                self::DATA_TYPE_NUMBER,
-                self::DATA_TYPE_DATETIME,
-                self::DATA_TYPE_AVATAR_IMAGE
-            ]
-        ];
         return $rules;
     }
 }

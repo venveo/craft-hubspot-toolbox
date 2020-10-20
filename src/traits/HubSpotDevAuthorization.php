@@ -9,6 +9,8 @@ trait HubSpotDevAuthorization
 {
     private static $hsDev = null;
 
+    private static $appId = null;
+
     /**
      * @return Factory
      */
@@ -21,5 +23,13 @@ trait HubSpotDevAuthorization
         $settings = HubSpotToolbox::$plugin->getSettings();
         $devKey = \Craft::parseEnv($settings->devApiKey);
         return self::$hsDev = Factory::create($devKey);
+    }
+
+    public function getAppId() {
+        if (self::$appId) {
+            return self::$appId;
+        }
+        $settings = HubSpotToolbox::$plugin->getSettings();
+        return \Craft::parseEnv($settings->appId);
     }
 }

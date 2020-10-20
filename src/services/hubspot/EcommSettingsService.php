@@ -15,29 +15,18 @@ use SevenShores\Hubspot\Exceptions\HubspotException;
 use venveo\hubspottoolbox\entities\ecommerce\ExternalPropertyMapping;
 use venveo\hubspottoolbox\entities\ecommerce\ExternalSyncSettings;
 use venveo\hubspottoolbox\entities\ecommerce\Settings as EcommerceBridgeSettings;
-use venveo\hubspottoolbox\HubSpotToolbox;
+use venveo\hubspottoolbox\enums\HubSpotObjectType;
+use venveo\hubspottoolbox\traits\HubSpotDevAuthorization;
 
-/**
- */
 class EcommSettingsService extends Component
 {
-    /** @var \SevenShores\Hubspot\Factory $hs */
-    private $hs = null;
-    private $appId = null;
-
-    public function init()
-    {
-        parent::init();
-
-        $this->hs = HubSpotToolbox::$plugin->hubspot->getHubspot(true);
-        $this->appId = \Craft::parseEnv(HubSpotToolbox::$plugin->settings->appId);
-    }
+    use HubSpotDevAuthorization;
 
     public function getMappingSettings()
     {
         try {
-            $results = $this->hs->ecommerceBridge()->getSettings([
-                'appId' => $this->appId
+            $results = $this->getHubSpotDev()->ecommerceBridge()->getSettings([
+                'appId' => $this->getAppId()
             ]);
         } catch (HubspotException $e) {
             \Craft::dd($e->getResponse()->getBody()->getContents());
@@ -155,13 +144,13 @@ class EcommSettingsService extends Component
         $settings = new EcommerceBridgeSettings();
         $settings->webhookUri = 'https://a8df854fa34c.ngrok.io/hubspot-toolbox/ecommerce-import/webhook-import';
         $settings->enabled = true;
-        $settings->setObjectSettings('CONTACT', $this->getContactProperties());
-        $settings->setObjectSettings('PRODUCT', $this->getProductProperties());
-        $settings->setObjectSettings('DEAL', $this->getDealProperties());
-        $settings->setObjectSettings('LINE_ITEM', $this->getLineItemProperties());
+        $settings->setObjectSettings(HubSpotObjectType::Contact, $this->getContactProperties());
+        $settings->setObjectSettings(HubSpotObjectType::Product, $this->getProductProperties());
+        $settings->setObjectSettings(HubSpotObjectType::Product, $this->getDealProperties());
+        $settings->setObjectSettings(HubSpotObjectType::LineItem, $this->getLineItemProperties());
         try {
-            $response = $this->hs->ecommerceBridge()->upsertSettings($settings->prepareForApi(),
-                ['appId' => $this->appId]);
+            $response = $this->getHubSpotDev()->ecommerceBridge()->upsertSettings($settings->prepareForApi(),
+                ['appId' => $this->getAppId()]);
         } catch (HubspotException $e) {
             \Craft::dd($e->getResponse()->getBody()->getContents());
         }

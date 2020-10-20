@@ -7,6 +7,7 @@
 namespace venveo\hubspottoolbox\entities\ecommerce;
 
 use venveo\hubspottoolbox\entities\HubSpotEntity;
+use venveo\hubspottoolbox\enums\HubSpotObjectType;
 use venveo\hubspottoolbox\validators\EmbeddedModelValidator;
 
 /**
@@ -15,11 +16,6 @@ use venveo\hubspottoolbox\validators\EmbeddedModelValidator;
  */
 class SyncMessagesWithMetaData extends HubSpotEntity
 {
-    public const TYPE_CONTACT = 'CONTACT';
-    public const TYPE_DEAL = 'DEAL';
-    public const TYPE_LINE_ITEM = 'LINE_ITEM';
-    public const TYPE_PRODUCT = 'PRODUCT';
-
     public string $storeId;
     public string $objectType;
     /** @var <ExternalSyncMessage>[] $messages */
@@ -52,7 +48,12 @@ class SyncMessagesWithMetaData extends HubSpotEntity
         $rules = parent::defineRules();
         $rules[] = [['storeId', 'objectType'], 'required'];
         $rules[] = ['messages', 'each', 'rule' => [EmbeddedModelValidator::class]];
-        $rules[] = ['objectType', 'in', 'range' => [self::TYPE_CONTACT, self::TYPE_DEAL, self::TYPE_LINE_ITEM, self::TYPE_PRODUCT]];
+        $rules[] = ['objectType', 'in', 'range' => [
+            HubSpotObjectType::Contact,
+            HubSpotObjectType::Deal,
+            HubSpotObjectType::LineItem,
+            HubSpotObjectType::Product
+        ]];
         return $rules;
     }
 }

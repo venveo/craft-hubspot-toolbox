@@ -11,7 +11,9 @@ use craft\commerce\elements\Order;
 use craft\events\ModelEvent;
 use venveo\hubspottoolbox\entities\ecommerce\ExternalSyncMessage;
 use venveo\hubspottoolbox\entities\ecommerce\SyncMessagesWithMetaData;
+use venveo\hubspottoolbox\enums\HubSpotObjectType;
 use venveo\hubspottoolbox\features\EcommerceFeature;
+use venveo\hubspottoolbox\helpers\HubSpotTimeHelper;
 use venveo\hubspottoolbox\HubSpotToolbox;
 
 class EcommerceListener
@@ -24,7 +26,7 @@ class EcommerceListener
         $purchasable = $e->sender;
         $syncMessage = new ExternalSyncMessage([
             'action' => ExternalSyncMessage::ACTION_UPSERT,
-            'changedAt' => (int)(microtime(true) * 1000),
+            'changedAt' => HubSpotTimeHelper::getChangedAtTimeStamp(),
             'externalObjectId' => $purchasable->id,
             'properties' => [
                 'product_name' => $purchasable->title,
@@ -33,7 +35,7 @@ class EcommerceListener
             ]
         ]);
         $payload = new SyncMessagesWithMetaData();
-        $payload->objectType = SyncMessagesWithMetaData::TYPE_PRODUCT;
+        $payload->objectType = HubSpotObjectType::Product;
         $payload->storeId = $feature->storeId;
         $payload->addMessage($syncMessage);
 
@@ -55,7 +57,7 @@ class EcommerceListener
         $order = $e->sender;
         $syncMessage = new ExternalSyncMessage([
             'action' => ExternalSyncMessage::ACTION_UPSERT,
-            'changedAt' => (int)(microtime(true) * 1000),
+            'changedAt' => HubSpotTimeHelper::getChangedAtTimeStamp(),
             'externalObjectId' => $order->email,
             'properties' => [
                 'firstname' => $order->shippingAddress->firstName,
@@ -64,13 +66,13 @@ class EcommerceListener
             ]
         ]);
         $payload = new SyncMessagesWithMetaData();
-        $payload->objectType = SyncMessagesWithMetaData::TYPE_CONTACT;
+        $payload->objectType = HubSpotObjectType::Contact;
         $payload->storeId = $feature->storeId;
         $payload->addMessage($syncMessage);
 
         $deal = new ExternalSyncMessage([
             'action' => ExternalSyncMessage::ACTION_UPSERT,
-            'changedAt' => (int)(microtime(true) * 1000),
+            'changedAt' => HubSpotTimeHelper::getChangedAtTimeStamp(),
             'externalObjectId' => $order->id,
             'properties' => [
                 'order_id' => $order->number,
@@ -83,7 +85,7 @@ class EcommerceListener
             ]
         ]);
         $payload2 = new SyncMessagesWithMetaData();
-        $payload2->objectType = SyncMessagesWithMetaData::TYPE_DEAL;
+        $payload2->objectType = HubSpotObjectType::Contact;
         $payload2->storeId = $feature->storeId;
         $payload2->addMessage($deal);
 
