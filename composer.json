@@ -23,7 +23,7 @@
     ],
     "require": {
         "craftcms/cms": "^3.0.0",
-        "hubspot/hubspot-php": "^2.0.5"
+        "hubspot/hubspot-php": "^3.0.0"
     },
     "autoload": {
         "psr-4": {
