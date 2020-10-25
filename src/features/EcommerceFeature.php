@@ -1,6 +1,7 @@
 <?php
 namespace venveo\hubspottoolbox\features;
 
+use craft\helpers\UrlHelper;
 use venveo\hubspottoolbox\HubSpotToolbox;
 
 class EcommerceFeature extends HubSpotFeature {
@@ -17,8 +18,18 @@ class EcommerceFeature extends HubSpotFeature {
         return 'ecommerce';
     }
 
+    public function getMenuItem()
+    {
+        return [
+            'label' => 'E-Commerce',
+            'url' => UrlHelper::cpUrl('hubspot-toolbox/ecommerce')
+        ];
+    }
+
     public function getSettingsHtml()
     {
+//        $data = HubSpotToolbox::$plugin->ecommDeals->getDealStages();
+//        \Craft::dd($data);
         $stores = HubSpotToolbox::$plugin->ecomm->getStores();
         return \Craft::$app->getView()->renderTemplate('hubspot-toolbox/_features/ecommerce/_settings', [
             'feature' => $this,

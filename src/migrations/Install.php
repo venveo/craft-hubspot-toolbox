@@ -66,6 +66,7 @@ class Install extends Migration
         $this->createTable('{{%hubspot_features}}', [
             'id' => $this->primaryKey(),
             'type' => $this->string()->notNull(),
+            'enabled' => $this->boolean()->notNull(),
             'settings' => $this->text(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),

@@ -18,9 +18,11 @@ use craft\events\ModelEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\services\Plugins;
 use craft\web\UrlManager;
+use venveo\hubspottoolbox\features\HubSpotFeature;
 use venveo\hubspottoolbox\listeners\EcommerceListener;
 use venveo\hubspottoolbox\models\Settings;
 use venveo\hubspottoolbox\services\FeaturesService;
+use venveo\hubspottoolbox\services\hubspot\EcommDealsService;
 use venveo\hubspottoolbox\services\hubspot\EcommService;
 use venveo\hubspottoolbox\services\hubspot\EcommSettingsService;
 use venveo\hubspottoolbox\services\OauthService;
@@ -34,6 +36,7 @@ use yii\base\Event;
  * @property  OauthService $oauth
  * @property  FeaturesService $features
  * @property  EcommService $ecomm
+ * @property  EcommDealsService $ecommDeals
  * @property  EcommSettingsService $ecommSettings
  * @property-read array $cpNavItem
  * @property  Settings $settings
@@ -60,6 +63,7 @@ class HubSpotToolbox extends Plugin
 //            'hubspot' => ContactsService::class,
             'ecomm' => EcommService::class,
             'ecommSettings' => EcommSettingsService::class,
+            'ecommDeals' => EcommDealsService::class,
             'oauth' => OauthService::class,
             'features' => FeaturesService::class
         ]);
@@ -117,6 +121,14 @@ class HubSpotToolbox extends Plugin
         $ret = parent::getCpNavItem();
         $ret['label'] = Craft::t('hubspot-toolbox', 'HubSpot');
 
+        $features = $this->features->getEnabledFeatures();
+        /** @var HubSpotFeature $feature */
+        foreach($features as $feature) {
+            if ($feature->getMenuItem()) {
+                $ret['subnav'][$feature::getHandle()] = $feature->getMenuItem();
+            }
+        }
+
         $ret['subnav']['features'] = [
             'label' => Craft::t('hubspot-toolbox', 'Features'),
             'url' => 'hubspot-toolbox/features'
@@ -126,6 +138,7 @@ class HubSpotToolbox extends Plugin
             'label' => Craft::t('hubspot-toolbox', 'Connection'),
             'url' => 'hubspot-toolbox/connection'
         ];
+
 
         return $ret;
     }

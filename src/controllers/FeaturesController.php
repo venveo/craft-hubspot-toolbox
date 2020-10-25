@@ -21,13 +21,14 @@ class FeaturesController extends Controller
             $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle($section);
         }
         if (!$feature) {
+            /** @var HubSpotFeature $feature */
             $feature = $features[0];
-            return $this->redirect(UrlHelper::cpUrl('hubspot-toolbox/features/' . $feature::getHandle()));
+            return $this->redirect($feature->getCpEditUrl());
         }
 
         return $this->renderTemplate('hubspot-toolbox/_features/index', [
             'features' => $features,
-            'feature' => $feature
+            'feature' => $feature,
         ]);
     }
 
@@ -36,11 +37,14 @@ class FeaturesController extends Controller
         $this->requirePostRequest();
         $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle(\Craft::$app->request->getRequiredBodyParam('feature'));
         $settings = \Craft::$app->request->getRequiredBodyParam('settings');
+        $enabled = \Craft::$app->request->getRequiredBodyParam('enabled');
         \Craft::configure($feature, $settings);
+        $feature->enabled = (bool)$enabled;
 
         if (HubSpotToolbox::$plugin->features->saveFeature($feature)) {
             \Craft::$app->session->setNotice('Saved settings');
         }
+        \Craft::$app->session->setError('Oops! Something went wrong.');
         return null;
     }
 }

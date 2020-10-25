@@ -34,6 +34,14 @@ class FeaturesService extends Component
     }
 
     /**
+     * @return <HubSpotFeature>[]
+     */
+    public function getEnabledFeatures()
+    {
+        return $this->_features()->where('enabled', true);
+    }
+
+    /**
      * @param $handle
      * @return HubSpotFeature
      */
@@ -101,6 +109,7 @@ class FeaturesService extends Component
 
         $configData = [
             'type' => get_class($feature),
+            'enabled' => $feature->enabled,
             'settings' => $feature->getSettings()
         ];
 
@@ -117,6 +126,7 @@ class FeaturesService extends Component
         try {
             $featureRecord = $this->_getFeatureRecord($data['type']);
             $featureRecord->settings = $data['settings'] ?? null;
+            $featureRecord->enabled = $data['enabled'] ?? false;
 
             // Save the volume
             $featureRecord->save(false);
@@ -166,6 +176,7 @@ class FeaturesService extends Component
             ->select([
                 'id',
                 'type',
+                'enabled',
                 'settings',
             ])
             ->from([HubSpotFeatureRecord::tableName()]);
@@ -184,6 +195,7 @@ class FeaturesService extends Component
         }
         return new HubSpotFeatureRecord([
             'type' => $type,
+            'enabled' => false,
             'uid' => StringHelper::UUID()
         ]);
     }

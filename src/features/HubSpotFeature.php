@@ -6,13 +6,23 @@ use craft\base\SavableComponent;
 use craft\helpers\FileHelper;
 use craft\helpers\StringHelper;
 use craft\helpers\Template;
+use craft\helpers\UrlHelper;
 
 abstract class HubSpotFeature extends SavableComponent implements HubSpotFeatureInterface
 {
+    public $enabled;
+
+    public function getCpEditUrl() {
+        return UrlHelper::cpUrl('hubspot-toolbox/features/' . static::getHandle());
+    }
 
     public function getRequiredScopes(): array
     {
         return [];
+    }
+
+    public function getMenuItem() {
+        return null;
     }
 
     /**

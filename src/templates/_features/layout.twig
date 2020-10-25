@@ -5,10 +5,11 @@
 
 {% set sidebarItems = {} %}
 {% for feature in features %}
+    {# @var \venveo\hubspottoolbox\features\HubSpotFeature feature #}
     {% set sidebarItems = sidebarItems|merge({
         (feature.handle): {
             label: feature.name,
-            url: cpUrl('hubspot-toolbox/features/' ~ feature.handle)
+            url: feature.cpEditUrl
         }
     }) %}
 {% endfor %}

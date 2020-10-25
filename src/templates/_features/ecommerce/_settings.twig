@@ -1,4 +1,12 @@
 {% import "_includes/forms" as forms %}
+
+{{ forms.lightswitchField({
+    label: 'Enable Ecommerce Integration',
+    name: 'enabled',
+    on: feature.enabled,
+    first: true,
+}) }}
+
 {% namespace 'settings' %}
     {% set fieldInput %}
         <div id="storeSelector"></div>
@@ -7,7 +15,6 @@
         label: 'HubSpot Store',
         name: 'storeId',
         errors: feature.getErrors('storeId'),
-        first: true,
         instructions: "Select the store referenced in your HubSpot account",
         id: 'storeId',
         required: true
