@@ -18,13 +18,13 @@ use craft\events\ModelEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\services\Plugins;
 use craft\web\UrlManager;
-use venveo\hubspottoolbox\features\HubSpotFeature;
 use venveo\hubspottoolbox\listeners\EcommerceListener;
 use venveo\hubspottoolbox\models\Settings;
 use venveo\hubspottoolbox\services\FeaturesService;
 use venveo\hubspottoolbox\services\hubspot\EcommDealsService;
 use venveo\hubspottoolbox\services\hubspot\EcommService;
 use venveo\hubspottoolbox\services\hubspot\EcommSettingsService;
+use venveo\hubspottoolbox\services\hubspot\PropertiesService;
 use venveo\hubspottoolbox\services\OauthService;
 use yii\base\Event;
 
@@ -38,6 +38,7 @@ use yii\base\Event;
  * @property  EcommService $ecomm
  * @property  EcommDealsService $ecommDeals
  * @property  EcommSettingsService $ecommSettings
+ * @property  PropertiesService $properties
  * @property-read array $cpNavItem
  * @property  Settings $settings
  * @method    Settings getSettings()
@@ -52,7 +53,7 @@ class HubSpotToolbox extends Plugin
      */
     public static $plugin;
 
-    public $schemaVersion = '1.0.0';
+    public $schemaVersion = '1.0.1';
 
     public function init()
     {
@@ -60,12 +61,12 @@ class HubSpotToolbox extends Plugin
         self::$plugin = $this;
 
         $this->setComponents([
-//            'hubspot' => ContactsService::class,
             'ecomm' => EcommService::class,
             'ecommSettings' => EcommSettingsService::class,
             'ecommDeals' => EcommDealsService::class,
             'oauth' => OauthService::class,
-            'features' => FeaturesService::class
+            'features' => FeaturesService::class,
+            'properties' => PropertiesService::class
         ]);
 
         // Add in our Twig extensions
@@ -78,9 +79,12 @@ class HubSpotToolbox extends Plugin
 //        );
 
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function (RegisterUrlRulesEvent $event) {
-            $event->rules['hubspot-toolbox'] = 'hubspot-toolbox/features/index';
-            $event->rules['hubspot-toolbox/features'] = 'hubspot-toolbox/features/index';
-            $event->rules['hubspot-toolbox/features/<section:{handle}>'] = 'hubspot-toolbox/features/index';
+            $event->rules['hubspot-toolbox'] = 'hubspot-toolbox/index';
+
+            $event->rules['hubspot-toolbox/ecommerce'] = 'hubspot-toolbox/ecommerce';
+            $event->rules['hubspot-toolbox/ecommerce/settings'] = 'hubspot-toolbox/ecommerce/settings';
+            $event->rules['hubspot-toolbox/ecommerce/contacts'] = 'hubspot-toolbox/ecommerce/contacts';
+
             $event->rules['hubspot-toolbox/connection'] = 'hubspot-toolbox/connection/index';
         });
 
@@ -121,17 +125,9 @@ class HubSpotToolbox extends Plugin
         $ret = parent::getCpNavItem();
         $ret['label'] = Craft::t('hubspot-toolbox', 'HubSpot');
 
-        $features = $this->features->getEnabledFeatures();
-        /** @var HubSpotFeature $feature */
-        foreach($features as $feature) {
-            if ($feature->getMenuItem()) {
-                $ret['subnav'][$feature::getHandle()] = $feature->getMenuItem();
-            }
-        }
-
-        $ret['subnav']['features'] = [
-            'label' => Craft::t('hubspot-toolbox', 'Features'),
-            'url' => 'hubspot-toolbox/features'
+        $ret['subnav']['ecommerce'] = [
+            'label' => 'E-Commerce',
+            'url' => 'hubspot-toolbox/ecommerce'
         ];
 
         $ret['subnav']['connection'] = [

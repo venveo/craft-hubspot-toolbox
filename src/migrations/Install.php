@@ -73,6 +73,16 @@ class Install extends Migration
             'uid' => $this->uid(),
         ]);
 
+        $this->createTable('{{%hubspot_object_mappings}}', [
+            'id' => $this->primaryKey(),
+            'type' => $this->string()->notNull(),
+            'property' => $this->string()->notNull(),
+            'template' => $this->text(),
+            'dateCreated' => $this->dateTime()->notNull(),
+            'dateUpdated' => $this->dateTime()->notNull(),
+            'uid' => $this->uid(),
+        ]);
+
         $this->createIndex(null, '{{%hubspot_forms}}', ['hubId'], true);
     }
 

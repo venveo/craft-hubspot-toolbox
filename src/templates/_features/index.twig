@@ -1,9 +1,0 @@
-{% extends 'hubspot-toolbox/_features/layout.twig' %}
-{# @var venveo\hubspottoolbox\features\HubSpotFeature feature #}
-{% set fullPageForm = true %}
-
-{% set content %}
-    {{ actionInput('hubspot-toolbox/features/save') }}
-    {{ hiddenInput('feature', feature.handle) }}
-    {{ feature.renderSettingsHtml }}
-{% endset %}

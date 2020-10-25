@@ -40,7 +40,11 @@
 import ecommerce from "../api/ecommerce";
 export default {
   name: 'StoreSelector',
-  inject: ['stores', 'value', 'name'],
+  props: {
+    stores: Array,
+    value: String,
+    name: String
+  },
   data() {
     return {
       internalValue: this.value,

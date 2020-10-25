@@ -15,5 +15,9 @@ export default {
                     'X-CSRF-Token': Craft.csrfTokenValue,
                 }
             });
+    },
+
+    getObjectMappings(type) {
+        return axios.get(Craft.getActionUrl('hubspot-toolbox/object-property-mapping/get-object-mappings', {type: type}))
     }
 }

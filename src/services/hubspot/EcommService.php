@@ -23,8 +23,6 @@ class EcommService extends Component
 
     public function getStores()
     {
-//        HubSpotToolbox::$plugin->ecommSettings->saveMappingSettings();
-//        \Craft::dd($this->hs->objectProperties('products')->all());
         $results = $this->getHubSpot()->ecommerceBridge()->allStores()->getData()->results;
         return array_map(function ($item) {
             return new Store($item);

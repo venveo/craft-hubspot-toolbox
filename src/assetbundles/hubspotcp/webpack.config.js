@@ -9,7 +9,7 @@ module.exports = (env = {}) => ({
     entry: path.resolve(__dirname, './src/main.js'),
     output: {
         path: path.resolve(__dirname, './dist'),
-        publicPath: 'http://craft3-plugindev.test:8080/dist/'
+        publicPath: 'https://craft3-plugindev.test:8080/dist/'
     },
     resolve: {
         alias: {

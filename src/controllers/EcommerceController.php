@@ -2,12 +2,31 @@
 
 namespace venveo\hubspottoolbox\controllers;
 
+use craft\helpers\UrlHelper;
 use craft\web\Controller;
 use venveo\hubspottoolbox\entities\ecommerce\Store;
 use venveo\hubspottoolbox\HubSpotToolbox;
 
 class EcommerceController extends Controller
 {
+    public function actionIndex() {
+        return $this->redirect(UrlHelper::cpUrl('hubspot-toolbox/ecommerce/settings'));
+    }
+
+    public function actionSettings() {
+        $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
+        return $this->renderTemplate('hubspot-toolbox/_ecommerce/settings', [
+            'feature' => $feature,
+            'stores' => HubSpotToolbox::$plugin->ecomm->getStores()
+        ]);
+    }
+
+    public function actionContacts() {
+        $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
+        return $this->renderTemplate('hubspot-toolbox/_ecommerce/contacts', [
+            'feature' => $feature
+        ]);
+    }
 
     public function actionSaveStore()
     {
