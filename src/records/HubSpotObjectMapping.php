@@ -18,4 +18,11 @@ class HubSpotObjectMapping extends ActiveRecord
     {
         return '{{%hubspot_object_mappings}}';
     }
+
+    public function datetimeAttributes(): array
+    {
+        $attributes = parent::datetimeAttributes();
+        $attributes[] = 'datePublished';
+        return $attributes;
+    }
 }

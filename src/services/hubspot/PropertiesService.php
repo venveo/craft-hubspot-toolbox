@@ -10,8 +10,10 @@
 
 namespace venveo\hubspottoolbox\services\hubspot;
 
+use Craft;
 use craft\base\Component;
 use craft\helpers\ArrayHelper;
+use craft\helpers\DateTimeHelper;
 use venveo\hubspottoolbox\entities\ObjectProperty;
 use venveo\hubspottoolbox\models\HubSpotObjectMapping;
 use venveo\hubspottoolbox\records\HubSpotObjectMapping as HubSpotObjectMappingRecord;
@@ -81,6 +83,28 @@ class PropertiesService extends Component
         $mapping->dateUpdated = $record->dateUpdated;
         $mapping->uid = $record->uid;
         return true;
+    }
+
+    public function publishMappings($objectType) {
+        $unpublishedMappings = $this->_createMappingQuery($objectType)->andWhere(['datePublished' => null])->all();
+        $unpublishedMappingProperties = ArrayHelper::getColumn($unpublishedMappings, 'property');
+        $publishedMappings = $this->_createMappingQuery($objectType)->andWhere(['IN', 'property', $unpublishedMappingProperties])->andWhere(['NOT', ['datePublished' => null]])->all();
+
+        $transaction = Craft::$app->getDb()->beginTransaction();
+        try {
+            foreach ($publishedMappings as $mapping) {
+                $mapping->delete();
+            }
+            /** @var HubSpotObjectMappingRecord $unpublishedMapping */
+            foreach($unpublishedMappings as $unpublishedMapping) {
+                $unpublishedMapping->datePublished = DateTimeHelper::currentUTCDateTime();
+                $unpublishedMapping->save();
+            }
+            $transaction->commit();
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
     }
 
     protected function _createMapping(HubSpotObjectMappingRecord $record, $objectProperty = null): HubSpotObjectMapping

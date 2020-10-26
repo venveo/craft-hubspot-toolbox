@@ -21,23 +21,27 @@ class ObjectPropertyMappingController extends Controller
         $this->requireAcceptsJson();
         $this->requirePostRequest();
         $data = \Craft::$app->request->getBodyParam('mapping');
-        $mapping = new HubSpotObjectMapping($data);
+        $mapping = new HubSpotObjectMapping([
+            'id' => $data['id'] ?? null,
+            'property' => $data['property'],
+            'template' => $data['template'],
+            'type' => $data['type'],
+            'datePublished' => null
+        ]);
         HubSpotToolbox::$plugin->properties->saveMapping($mapping);
-        return $this->asJson(['success']);
+        if ($mapping->template) {
+            $order = Order::find()->isCompleted(true)->orderBy('RAND()')->one();
+            $renderedTemplate = \Craft::$app->view->renderObjectTemplate($mapping->template, [], ['order' => $order]);
+            $mapping->setPreview($renderedTemplate);
+        }
+        return $this->asJson($mapping->toArray([], ['preview']));
     }
 
-    public function actionGetMappingPreview() {
-        $objectType = \Craft::$app->request->getRequiredQueryParam('objectType');
-        $mappings = HubSpotToolbox::$plugin->properties->getObjectMappings($objectType);
-        /** @var Order $order */
-        $order = Order::find()->isCompleted(true)->orderBy('RAND()')->one();
-        /** @var HubSpotObjectMapping $mapping */
-        foreach($mappings as $mapping) {
-            if ($mapping->template) {
-                $renderedTemplate = \Craft::$app->view->renderObjectTemplate($mapping->template, [], ['order' => $order]);
-                $mapping->preview = $renderedTemplate;
-            }
-        }
-        return $this->asJson($mappings);
+    public function actionPublishObjectMapping() {
+        $this->requireAcceptsJson();
+        $this->requirePostRequest();
+        $objectType = \Craft::$app->request->getBodyParam('objectType');
+        HubSpotToolbox::$plugin->properties->publishMappings($objectType);
+        return $this->asJson(['success' => true]);
     }
 }

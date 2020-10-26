@@ -1,18 +1,19 @@
 <template>
   <div class="flex">
     <button class="btn icon add" @click="showingPropertyPicker = !showingPropertyPicker">Add Property</button>
-    <button class="btn">Refresh Properties</button>
-    <button class="btn" @click.prevent="displayPreview">Preview</button>
+    <button class="btn submit" @click.prevent="publishChanges">Publish Changes</button>
   </div>
   <div v-if="showingPropertyPicker">
     <div class="pane flex">
       <div class="select">
-      <select v-model="selectedPropertyToAdd">
-        <option v-for="(item, idx) in unmappedData" :value="idx">{{item.propertyObject.label}} - ({{item.property}})</option>
-      </select>
+        <select v-model="selectedPropertyToAdd">
+          <option v-for="(item, idx) in unmappedData" :value="idx">{{ item.objectProperty.label }} -
+            ({{ item.property }})
+          </option>
+        </select>
       </div>
       <div>
-      <button class="btn icon add" @click.prevent="handleAddProperty">Add</button>
+        <button class="btn icon add" @click.prevent="handleAddProperty">Add</button>
       </div>
     </div>
     <hr>
@@ -23,20 +24,13 @@
       <tr>
         <th scope="col" class="heading-cell thin">HubSpot Property</th>
         <th scope="col" class="singleline-cell textual" style="">Object Template</th>
-        <th scope="col" class="heading-cell thin">&nbsp;</th>
+        <th scope="col" class="singleline-cell textual" style="">Preview</th>
+        <th colspan="1"></th>
       </tr>
       </thead>
       <tbody>
-      <tr v-for="(mapped, idx) in mappedData">
-        <th scope="row" class="heading-cell thin">{{mapped.property}}</th>
-        <td class="type-channel type-structure singleline-cell textual has-info code">
-            <textarea rows="1" placeholder="Enter object template"
-                      @input="e => handleObjectTemplateChanged(mapped, e)"
-                      style="min-height: 36px;"
-                      tabindex="0">{{mapped.template}}</textarea>
-        </td>
-        <th scope="row" class="heading-cell thin"><button class="btn small submit" @click.prevent="saveMapping(mapped)">Save</button></th>
-      </tr>
+      <mapped-property v-for="(mapping, idx) in mappedProperties" v-model:template="mappedProperties[idx].template"
+                       :mapping="mapping" v-on:delete="deletePropertyMapping(mapping)" @input="handleTemplateChange(mapping)"/>
       </tbody>
     </table>
   </div>
@@ -44,9 +38,11 @@
 
 <script>
 import api from '../../api/ecommerce.js'
+import MappedProperty from "./MappedProperty.vue";
 
 export default {
   name: 'FieldMapper',
+  components: {MappedProperty},
   props: {
     objectType: String
   },
@@ -54,34 +50,28 @@ export default {
     return {
       showingPropertyPicker: false,
       propertyMappings: [],
+      unmappedData: [],
+      mappedProperties: [],
+
       selectedPropertyToAdd: null
     }
   },
   mounted() {
     this.fetchMappings();
   },
-  computed: {
-    mappedData: function() {
-      return this.propertyMappings.filter(function(item) {
-        return item.id !== null
-      })
-    },
-    unmappedData: function () {
-      return this.propertyMappings.filter(function(item) {
-        if (item.propertyObject === undefined) {
-          console.log(item)
-        }
-        return item.id === null
-      })
-    }
-  },
   methods: {
     fetchMappings() {
       api.getObjectMappings('contacts').then((res) => {
         this.propertyMappings = res.data;
+        this.unmappedData = this.propertyMappings.filter(function (item) {
+          return item.id === null
+        })
+        this.mappedProperties = this.propertyMappings.filter(function (item) {
+          return item.id !== null
+        })
       })
     },
-    handleAddProperty: async function() {
+    handleAddProperty: async function () {
       await api.saveObjectMapping(this.unmappedData[this.selectedPropertyToAdd]);
       this.fetchMappings();
     },
@@ -95,12 +85,20 @@ export default {
       await api.saveObjectMapping(mapped);
       this.fetchMappings();
     },
-    async displayPreview() {
-      const previewData = await api.getPreview(this.objectType)
-      console.log(previewData)
+    async publishChanges() {
+      await api.publishObjectMappings(this.objectType);
+      alert('Published');
+      this.fetchMappings();
+    },
+    handleTemplateChange(mapping) {
+      api.saveObjectMapping(mapping).then(v => {
+        const mappingData = v.data
+        mapping.preview = mappingData.preview
+      });
+    },
+    async deletePropertyMapping(mapping) {
+      console.log('Need to delete', mapping)
     }
   }
-
-
 }
 </script>
