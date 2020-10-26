@@ -6,9 +6,10 @@
 {% set content %}
     <div id="field-mapper"></div>
     {% js %}
-        new Craft.HubSpot.FieldMapper({
-        container: '#field-mapper'
-        });
+    new Craft.HubSpot.FieldMapper({
+        container: '#field-mapper',
+        objectType: 'contacts'
+    });
     {% endjs %}
 {% endset %}
 

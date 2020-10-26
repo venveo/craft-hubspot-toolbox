@@ -18,5 +18,6 @@ class HubSpotObjectMapping extends Model
     public $dateUpdated;
     public $uid;
 
-    public $properyObject;
+    public $propertyObject;
+    public $preview;
 }

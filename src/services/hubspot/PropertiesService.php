@@ -57,10 +57,27 @@ class PropertiesService extends Component
                     'property' => $property->name,
                 ]);
             }
-            $mapping->properyObject = $property;
+            $mapping->propertyObject = $property;
             $data[] = $mapping;
         }
         return $data;
+    }
+
+    public function saveMapping(HubSpotObjectMapping $mapping) {
+        if ($mapping->id) {
+            $record = $this->_createMappingQuery($mapping->type)->where(['=', 'id', $mapping->id])->one();
+        } else {
+            $record = new HubSpotObjectMappingRecord();
+            $record->type = $mapping->type;
+        }
+        $record->property = $mapping->property;
+        $record->template = $mapping->template;
+        $record->save();
+        return $this->_createMapping($record);
+    }
+
+    protected function _createMapping(HubSpotObjectMappingRecord $record) {
+        return new HubSpotObjectMapping($record);
     }
 
     /**

@@ -40,6 +40,6 @@ Craft.HubSpot.FieldMapper = Garnish.Base.extend({
     {
         defaults: {
             container: null,
-            objectType: 'contact'
+            objectType: 'contacts'
         }
     });
