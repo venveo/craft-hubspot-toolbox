@@ -34,36 +34,38 @@ class PropertiesService extends Component
     {
         $mappings = $this->_createMappingQuery($objectType)->all();
         return array_map(function (HubSpotObjectMappingRecord $record) {
-            return new HubSpotObjectMapping($record);
+            return $this->_createMapping($record);
         }, $mappings);
     }
 
-    public function getMappingsByName($objectType) {
+    public function getMappingsByName($objectType)
+    {
         $mappings = $this->getObjectMappings($objectType);
-        $index = ArrayHelper::index($mappings, 'property');
-        return $index;
+        return ArrayHelper::index($mappings, 'property');
     }
 
-    public function getMappingData($objectType) {
+    /**
+     * @param $objectType
+     * @return array
+     */
+    public function getMappingData($objectType)
+    {
         $properties = $this->getObjectProperties($objectType);
         $mappingsByName = $this->getMappingsByName($objectType);
         $data = [];
-        foreach($properties as $property) {
-            if (isset($mappingsByName[$property->name])) {
-                $mapping = $mappingsByName[$property->name];
-            } else {
-                $mapping = new HubSpotObjectMapping([
+        foreach ($properties as $property) {
+            $mapping = $mappingsByName[$property->name] ?? new HubSpotObjectMapping([
                     'type' => $objectType,
                     'property' => $property->name,
                 ]);
-            }
-            $mapping->propertyObject = $property;
-            $data[] = $mapping;
+            $mapping->setObjectProperty($property);
+            $data[] = $mapping->toArray([], $mapping->extraFields());
         }
         return $data;
     }
 
-    public function saveMapping(HubSpotObjectMapping $mapping) {
+    public function saveMapping(HubSpotObjectMapping $mapping)
+    {
         if ($mapping->id) {
             $record = $this->_createMappingQuery($mapping->type)->where(['=', 'id', $mapping->id])->one();
         } else {
@@ -72,19 +74,30 @@ class PropertiesService extends Component
         }
         $record->property = $mapping->property;
         $record->template = $mapping->template;
+        $record->datePublished = $mapping->datePublished;
         $record->save();
-        return $this->_createMapping($record);
+        $mapping->id = $record->id;
+        $mapping->dateCreated = $record->dateCreated;
+        $mapping->dateUpdated = $record->dateUpdated;
+        $mapping->uid = $record->uid;
+        return true;
     }
 
-    protected function _createMapping(HubSpotObjectMappingRecord $record) {
-        return new HubSpotObjectMapping($record);
+    protected function _createMapping(HubSpotObjectMappingRecord $record, $objectProperty = null): HubSpotObjectMapping
+    {
+        $model = new HubSpotObjectMapping($record);
+        if ($objectProperty) {
+            $model->setObjectProperty($objectProperty);
+        }
+        return $model;
     }
 
     /**
      * @param $objectType
      * @return \craft\db\ActiveQuery
      */
-    protected function _createMappingQuery($objectType) {
+    protected function _createMappingQuery($objectType): \craft\db\ActiveQuery
+    {
         return HubSpotObjectMappingRecord::find()->where(['=', 'type', $objectType]);
     }
 }

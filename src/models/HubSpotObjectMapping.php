@@ -2,22 +2,61 @@
 
 namespace venveo\hubspottoolbox\models;
 
-use craft\base\Element;
-use craft\base\ElementInterface;
-use craft\helpers\Template;
-use venveo\hubspottoolbox\records\HubSpotFormRecord;
+use venveo\hubspottoolbox\entities\ObjectProperty;
 use yii\base\Model;
 
 class HubSpotObjectMapping extends Model
 {
     public $id;
-    public $type;
-    public $property;
+    public string $type;
+    public string $property;
     public $template;
-    public $dateCreated;
-    public $dateUpdated;
     public $uid;
 
-    public $propertyObject;
-    public $preview;
+    public $datePublished;
+    public $dateCreated;
+    public $dateUpdated;
+
+    private $preview;
+    private $objectProperty;
+
+    /**
+     * @return ObjectProperty
+     */
+    public function getObjectProperty()
+    {
+        return $this->objectProperty;
+    }
+
+    /**
+     * @param ObjectProperty $objectProperty
+     */
+    public function setObjectProperty(ObjectProperty $objectProperty): void
+    {
+        $this->objectProperty = $objectProperty;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPreview()
+    {
+        return $this->preview;
+    }
+
+    /**
+     * @param string $preview
+     */
+    public function setPreview(string $preview): void
+    {
+        $this->preview = $preview;
+    }
+
+    public function extraFields()
+    {
+        return [
+            'preview',
+            'objectProperty'
+        ];
+    }
 }

@@ -5,12 +5,12 @@ namespace venveo\hubspottoolbox\records;
 use craft\db\ActiveRecord;
 
 /**
- * Class HubSpotFeature
  * @package venveo\hubspottoolbox\records
  * @property int $id [int]
  * @property string $type [varchar(255)]
- * @property bool $enabled
- * @property string $settings
+ * @property string $property [varchar(255)]
+ * @property string $template
+ * @property \DateTime $datePublished
  */
 class HubSpotObjectMapping extends ActiveRecord
 {
