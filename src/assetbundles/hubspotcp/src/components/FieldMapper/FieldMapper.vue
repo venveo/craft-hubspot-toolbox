@@ -44,7 +44,8 @@ export default {
   name: 'FieldMapper',
   components: {MappedProperty},
   props: {
-    objectType: String
+    objectType: String,
+    context: String
   },
   data() {
     return {
@@ -61,7 +62,7 @@ export default {
   },
   methods: {
     fetchMappings() {
-      api.getObjectMappings('contacts').then((res) => {
+      api.getObjectMappings(this.objectType, this.context).then((res) => {
         this.propertyMappings = res.data;
         this.unmappedData = this.propertyMappings.filter(function (item) {
           return item.id === null
@@ -86,7 +87,7 @@ export default {
       this.fetchMappings();
     },
     async publishChanges() {
-      await api.publishObjectMappings(this.objectType);
+      await api.publishObjectMappings(this.objectType, this.context);
       alert('Published');
       this.fetchMappings();
     },

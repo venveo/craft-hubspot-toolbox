@@ -8,6 +8,7 @@ use craft\db\ActiveRecord;
  * @package venveo\hubspottoolbox\records
  * @property int $id [int]
  * @property string $type [varchar(255)]
+ * @property string $context [varchar(64)]
  * @property string $property [varchar(255)]
  * @property string $template
  * @property \DateTime $datePublished

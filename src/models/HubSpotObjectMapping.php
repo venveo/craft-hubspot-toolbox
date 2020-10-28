@@ -9,6 +9,7 @@ class HubSpotObjectMapping extends Model
 {
     public $id;
     public string $type;
+    public string $context;
     public string $property;
     public $template;
     public $uid;

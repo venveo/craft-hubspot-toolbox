@@ -32,7 +32,7 @@ Craft.HubSpot.FieldMapper = Garnish.Base.extend({
         init: function (settings) {
             this.setSettings(settings, Craft.HubSpot.FieldMapper.defaults);
 
-            const props = this.settings;
+            const props = this.settings.props;
             const app = createApp(FieldMapper, props)
             const vm = app.mount(this.settings.container)
         },
@@ -40,6 +40,9 @@ Craft.HubSpot.FieldMapper = Garnish.Base.extend({
     {
         defaults: {
             container: null,
-            objectType: 'contacts'
+            props: {
+                objectType: 'contacts',
+                context: null
+            }
         }
     });

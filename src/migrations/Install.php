@@ -76,6 +76,7 @@ class Install extends Migration
         $this->createTable('{{%hubspot_object_mappings}}', [
             'id' => $this->primaryKey(),
             'type' => $this->string()->notNull(),
+            'context' => $this->string(64)->notNull(),
             'property' => $this->string()->notNull(),
             'template' => $this->text(),
             'datePublished' => $this->dateTime(),

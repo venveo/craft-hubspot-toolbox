@@ -17,8 +17,8 @@ export default {
             });
     },
 
-    getObjectMappings(type) {
-        return axios.get(Craft.getActionUrl('hubspot-toolbox/object-property-mapping/get-object-mappings', {objectType: type}))
+    getObjectMappings(objectType, context) {
+        return axios.get(Craft.getActionUrl('hubspot-toolbox/object-property-mapping/get-object-mappings', {objectType: objectType, context: context}))
     },
 
     saveObjectMapping(mapping, previewElementId) {
@@ -32,9 +32,10 @@ export default {
         })
     },
 
-    publishObjectMappings(objectType) {
+    publishObjectMappings(objectType, context) {
         return axios.post(Craft.getActionUrl('hubspot-toolbox/object-property-mapping/publish-object-mapping'), {
-            objectType: objectType
+            objectType: objectType,
+            context: context
         }, {
             headers: {
                 'X-CSRF-Token': Craft.csrfTokenValue,

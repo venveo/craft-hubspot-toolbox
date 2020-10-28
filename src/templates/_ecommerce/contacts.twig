@@ -8,7 +8,10 @@
     {% js %}
     new Craft.HubSpot.FieldMapper({
         container: '#field-mapper',
-        objectType: 'contacts'
+        props: {
+            objectType: 'contacts',
+            context: 'ecomm.order'
+        }
     });
     {% endjs %}
 {% endset %}

@@ -32,17 +32,17 @@ class PropertiesService extends Component
         return $properties;
     }
 
-    public function getObjectMappings($objectType)
+    public function getObjectMappings($objectType, $context)
     {
-        $mappings = $this->_createMappingQuery($objectType)->all();
+        $mappings = $this->_createMappingQuery($objectType, $context)->all();
         return array_map(function (HubSpotObjectMappingRecord $record) {
             return $this->_createMapping($record);
         }, $mappings);
     }
 
-    public function getMappingsByName($objectType)
+    public function getMappingsByName($objectType, $context)
     {
-        $mappings = $this->getObjectMappings($objectType);
+        $mappings = $this->getObjectMappings($objectType, $context);
         return ArrayHelper::index($mappings, 'property');
     }
 
@@ -50,15 +50,16 @@ class PropertiesService extends Component
      * @param $objectType
      * @return array
      */
-    public function getMappingData($objectType)
+    public function getMappingData($objectType, $context)
     {
         $properties = $this->getObjectProperties($objectType);
-        $mappingsByName = $this->getMappingsByName($objectType);
+        $mappingsByName = $this->getMappingsByName($objectType, $context);
         $data = [];
         foreach ($properties as $property) {
             $mapping = $mappingsByName[$property->name] ?? new HubSpotObjectMapping([
                     'type' => $objectType,
                     'property' => $property->name,
+                    'context' => $context
                 ]);
             $mapping->setObjectProperty($property);
             $data[] = $mapping->toArray([], $mapping->extraFields());
@@ -74,6 +75,7 @@ class PropertiesService extends Component
             $record = new HubSpotObjectMappingRecord();
             $record->type = $mapping->type;
         }
+        $record->context = $mapping->context;
         $record->property = $mapping->property;
         $record->template = $mapping->template;
         $record->datePublished = $mapping->datePublished;
@@ -85,10 +87,10 @@ class PropertiesService extends Component
         return true;
     }
 
-    public function publishMappings($objectType) {
-        $unpublishedMappings = $this->_createMappingQuery($objectType)->andWhere(['datePublished' => null])->all();
+    public function publishMappings($objectType, $context) {
+        $unpublishedMappings = $this->_createMappingQuery($objectType, $context)->andWhere(['datePublished' => null])->all();
         $unpublishedMappingProperties = ArrayHelper::getColumn($unpublishedMappings, 'property');
-        $publishedMappings = $this->_createMappingQuery($objectType)->andWhere(['IN', 'property', $unpublishedMappingProperties])->andWhere(['NOT', ['datePublished' => null]])->all();
+        $publishedMappings = $this->_createMappingQuery($objectType, $context)->andWhere(['IN', 'property', $unpublishedMappingProperties])->andWhere(['NOT', ['datePublished' => null]])->all();
 
         $transaction = Craft::$app->getDb()->beginTransaction();
         try {
@@ -120,8 +122,8 @@ class PropertiesService extends Component
      * @param $objectType
      * @return \craft\db\ActiveQuery
      */
-    protected function _createMappingQuery($objectType): \craft\db\ActiveQuery
+    protected function _createMappingQuery($objectType, $context = null): \craft\db\ActiveQuery
     {
-        return HubSpotObjectMappingRecord::find()->where(['=', 'type', $objectType]);
+        return HubSpotObjectMappingRecord::find()->where(['=', 'type', $objectType])->andWhere(['context' => $context]);
     }
 }

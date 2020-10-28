@@ -13,7 +13,8 @@ class ObjectPropertyMappingController extends Controller
     public function actionGetObjectMappings()
     {
         $objectType = \Craft::$app->request->getRequiredQueryParam('objectType');
-        $properties = HubSpotToolbox::$plugin->properties->getMappingData($objectType);
+        $context = \Craft::$app->request->getRequiredQueryParam('context');
+        $properties = HubSpotToolbox::$plugin->properties->getMappingData($objectType, $context);
         return $this->asJson($properties);
     }
 
@@ -25,6 +26,7 @@ class ObjectPropertyMappingController extends Controller
             'id' => $data['id'] ?? null,
             'property' => $data['property'],
             'template' => $data['template'],
+            'context' => $data['context'],
             'type' => $data['type'],
             'datePublished' => null
         ]);
@@ -40,8 +42,9 @@ class ObjectPropertyMappingController extends Controller
     public function actionPublishObjectMapping() {
         $this->requireAcceptsJson();
         $this->requirePostRequest();
-        $objectType = \Craft::$app->request->getBodyParam('objectType');
-        HubSpotToolbox::$plugin->properties->publishMappings($objectType);
+        $objectType = \Craft::$app->request->getRequiredBodyParam('objectType');
+        $context = \Craft::$app->request->getRequiredBodyParam('context');
+        HubSpotToolbox::$plugin->properties->publishMappings($objectType, $context);
         return $this->asJson(['success' => true]);
     }
 }
