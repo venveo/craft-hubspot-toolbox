@@ -8,8 +8,7 @@ use yii\base\Model;
 class HubSpotObjectMapping extends Model
 {
     public $id;
-    public string $type;
-    public string $context;
+    public int $mapperId;
     public string $property;
     public $template;
     public $uid;
@@ -18,8 +17,9 @@ class HubSpotObjectMapping extends Model
     public $dateCreated;
     public $dateUpdated;
 
-    private $preview;
-    private $objectProperty;
+    protected $objectProperty;
+
+    protected $renderedValue;
 
     /**
      * @return ObjectProperty
@@ -38,26 +38,26 @@ class HubSpotObjectMapping extends Model
     }
 
     /**
-     * @return string
+     * @return mixed
      */
-    public function getPreview()
+    public function getRenderedValue()
     {
-        return $this->preview;
+        return $this->renderedValue;
     }
 
     /**
-     * @param string $preview
+     * @param mixed $renderedValue
      */
-    public function setPreview(string $preview): void
+    public function setRenderedValue($renderedValue): void
     {
-        $this->preview = $preview;
+        $this->renderedValue = $renderedValue;
     }
 
     public function extraFields()
     {
         return [
-            'preview',
-            'objectProperty'
+            'objectProperty',
+            'renderedValue'
         ];
     }
 }

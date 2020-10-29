@@ -10,6 +10,7 @@
 
 namespace venveo\hubspottoolbox\migrations;
 
+use craft\db\Table;
 use venveo\hubspottoolbox\HubSpotToolbox;
 
 use Craft;
@@ -37,18 +38,6 @@ class Install extends Migration
     public function safeUp()
     {
         $this->createTable(
-            '{{%hubspot_forms}}',
-            [
-                'id' => $this->primaryKey(),
-                'hubId' => $this->string(255)->notNull(),
-                'name' => $this->string(255)->notNull(),
-                'dateCreated' => $this->dateTime()->notNull(),
-                'dateUpdated' => $this->dateTime()->notNull(),
-                'uid' => $this->uid(),
-            ]
-        );
-
-        $this->createTable(
             '{{%hubspot_tokens}}',
             [
                 'id' => $this->primaryKey(),
@@ -73,10 +62,19 @@ class Install extends Migration
             'uid' => $this->uid(),
         ]);
 
+
+        $this->createTable('{{%hubspot_object_mappers}}', [
+            'id' => $this->primaryKey(),
+            'type' => $this->string(128)->notNull(),
+            'sourceTypeId' => $this->integer()->null(),
+            'dateCreated' => $this->dateTime()->notNull(),
+            'dateUpdated' => $this->dateTime()->notNull(),
+            'uid' => $this->uid(),
+        ]);
+
         $this->createTable('{{%hubspot_object_mappings}}', [
             'id' => $this->primaryKey(),
-            'type' => $this->string()->notNull(),
-            'context' => $this->string(64)->notNull(),
+            'mapperId' => $this->integer()->notNull(),
             'property' => $this->string()->notNull(),
             'template' => $this->text(),
             'datePublished' => $this->dateTime(),
@@ -85,12 +83,30 @@ class Install extends Migration
             'uid' => $this->uid(),
         ]);
 
-        $this->createIndex(null, '{{%hubspot_forms}}', ['hubId'], true);
+        $this->createTable('{{%hubspot_element_map}}', [
+            'id' => $this->primaryKey(),
+            'elementId' => $this->integer()->notNull(),
+            'elementSiteId' => $this->integer()->notNull(),
+            'remoteObjectId' => $this->integer()->notNull(),
+            'dateLastSynced' => $this->dateTime()->null(),
+            'dateCreated' => $this->dateTime()->notNull(),
+            'dateUpdated' => $this->dateTime()->notNull(),
+            'uid' => $this->uid(),
+        ]);
+
+        $this->createIndex(null, '{{%hubspot_element_map}}', ['remoteObjectId'], true);
+        $this->createIndex(null, '{{%hubspot_element_map}}', ['elementId'], true);
+
+        $this->addForeignKey(null, '{{%hubspot_object_mappings}}', ['mapperId'], '{{%hubspot_object_mappers}}', ['id']);
+        $this->addForeignKey(null, '{{%hubspot_element_map}}', ['elementId'], Table::ELEMENTS, ['id']);
+        $this->addForeignKey(null, '{{%hubspot_element_map}}', ['elementSiteId'], Table::SITES, ['id']);
     }
 
     public function safeDown()
     {
-        $this->dropTableIfExists('{{%hubspot_forms}}');
+        $this->dropTableIfExists('{{%hubspot_element_map}}');
+        $this->dropTableIfExists('{{%hubspot_object_mappings}}');
+        $this->dropTableIfExists('{{%hubspot_object_mappers}}');
         $this->dropTableIfExists('{{%hubspot_tokens}}');
         $this->dropTableIfExists('{{%hubspot_features}}');
     }

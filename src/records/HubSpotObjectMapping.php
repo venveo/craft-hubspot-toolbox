@@ -7,8 +7,7 @@ use craft\db\ActiveRecord;
 /**
  * @package venveo\hubspottoolbox\records
  * @property int $id [int]
- * @property string $type [varchar(255)]
- * @property string $context [varchar(64)]
+ * @property int $mapperId
  * @property string $property [varchar(255)]
  * @property string $template
  * @property \DateTime $datePublished
@@ -25,5 +24,9 @@ class HubSpotObjectMapping extends ActiveRecord
         $attributes = parent::datetimeAttributes();
         $attributes[] = 'datePublished';
         return $attributes;
+    }
+
+    public function getMapper() {
+        return $this->hasOne(HubSpotObjectMapper::class, ['id' => 'mapperId']);
     }
 }

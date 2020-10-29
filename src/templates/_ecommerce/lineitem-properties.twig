@@ -1,7 +1,7 @@
 {% extends 'hubspot-toolbox/_ecommerce/layout' %}
 {% import "_includes/forms" as forms %}
 
-{% set selectedSidebarItem = 'contacts' %}
+{% set selectedSidebarItem = 'lineitem-properties' %}
 
 {% set content %}
     <div id="field-mapper"></div>
@@ -9,8 +9,8 @@
     new Craft.HubSpot.FieldMapper({
         container: '#field-mapper',
         props: {
-            objectType: 'contacts',
-            context: 'ecomm.order'
+            mapper: 'venveo\\hubspottoolbox\\propertymappers\\EcommerceLineItem',
+            sourceTypeId: null
         }
     });
     {% endjs %}

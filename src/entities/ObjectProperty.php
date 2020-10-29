@@ -11,6 +11,7 @@ namespace venveo\hubspottoolbox\entities;
  */
 class ObjectProperty extends HubSpotEntity
 {
+    // HubSpot attributes
     public $name;
     public $label;
     public $description;

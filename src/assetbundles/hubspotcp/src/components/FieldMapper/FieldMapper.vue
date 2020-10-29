@@ -1,15 +1,15 @@
 <template>
   <div class="flex">
     <button class="btn icon add" @click="showingPropertyPicker = !showingPropertyPicker">Add Property</button>
+    <button class="btn icon search" :class="{'disabled': loadingNewPreview}" :disabled="loadingNewPreview" @click="updatePreview">New Preview</button>
     <button class="btn submit" @click.prevent="publishChanges">Publish Changes</button>
   </div>
   <div v-if="showingPropertyPicker">
     <div class="pane flex">
       <div class="select">
         <select v-model="selectedPropertyToAdd">
-          <option v-for="(item, idx) in unmappedData" :value="idx">{{ item.objectProperty.label }} -
-            ({{ item.property }})
-          </option>
+          <option disabled selected value="">Select Property</option>
+          <option v-for="(data, name) in properties" :value="name" :disabled="Object.keys(propertyMappings).includes(name)">{{ data.label }} - ({{ name }})</option>
         </select>
       </div>
       <div>
@@ -29,8 +29,13 @@
       </tr>
       </thead>
       <tbody>
-      <mapped-property v-for="(mapping, idx) in mappedProperties" v-model:template="mappedProperties[idx].template"
-                       :mapping="mapping" v-on:delete="deletePropertyMapping(mapping)" @input="handleTemplateChange(mapping)"/>
+      <mapped-property v-for="(mapping, name) in propertyMappings"
+                       v-model:template="propertyMappings[name].template"
+                       :property="properties[name]"
+                       :preview="propertyMappings[name].renderedValue"
+                       v-on:input="(e) => {handleTemplateChange(propertyMappings[name])}"
+                       v-on:delete="deletePropertyMapping(propertyMappings[name])"
+      />
       </tbody>
     </table>
   </div>
@@ -39,41 +44,42 @@
 <script>
 import api from '../../api/ecommerce.js'
 import MappedProperty from "./MappedProperty.vue";
+import {debounce} from "lodash"
 
 export default {
   name: 'FieldMapper',
   components: {MappedProperty},
   props: {
-    objectType: String,
-    context: String
+    mapper: String,
+    sourceTypeId: Number
   },
   data() {
     return {
       showingPropertyPicker: false,
       propertyMappings: [],
-      unmappedData: [],
-      mappedProperties: [],
+      properties: [],
 
-      selectedPropertyToAdd: null
+      selectedPropertyToAdd: '',
+      previewObjectId: null,
+
+      loadingNewPreview: false
     }
   },
   mounted() {
-    this.fetchMappings();
+    this.fetchMappings().then(() => {})
   },
   methods: {
-    fetchMappings() {
-      api.getObjectMappings(this.objectType, this.context).then((res) => {
-        this.propertyMappings = res.data;
-        this.unmappedData = this.propertyMappings.filter(function (item) {
-          return item.id === null
-        })
-        this.mappedProperties = this.propertyMappings.filter(function (item) {
-          return item.id !== null
-        })
-      })
+    async fetchMappings() {
+      const {data} = await api.getObjectMappings(this.mapper, this.previewObjectId)
+      this.properties = data.properties
+      this.propertyMappings = data.propertyMappings
+      this.previewObjectId = data.previewObjectId
     },
     handleAddProperty: async function () {
-      await api.saveObjectMapping(this.unmappedData[this.selectedPropertyToAdd]);
+      const mapping = {
+        property: this.selectedPropertyToAdd,
+      }
+      await api.saveObjectMapping(mapping, this.mapper, this.sourceTypeId, this.previewObjectId);
       this.fetchMappings();
     },
     handleObjectTemplateChanged(mapped, e) {
@@ -83,22 +89,28 @@ export default {
       this.propertyMappings[index].template = e.target.value
     },
     async saveMapping(mapped) {
-      await api.saveObjectMapping(mapped);
+      await api.saveObjectMapping(mapped, this.mapper, this.sourceTypeId, this.previewObjectId);
       this.fetchMappings();
     },
     async publishChanges() {
-      await api.publishObjectMappings(this.objectType, this.context);
+      await api.publishObjectMappings(this.mapper, this.sourceTypeId);
       alert('Published');
       this.fetchMappings();
     },
-    handleTemplateChange(mapping) {
-      api.saveObjectMapping(mapping).then(v => {
+    handleTemplateChange: debounce(function(mapping) {
+      api.saveObjectMapping(mapping, this.mapper, this.sourceTypeId, this.previewObjectId).then(v => {
         const mappingData = v.data
-        mapping.preview = mappingData.preview
+        mapping.renderedValue = mappingData.renderedValue
       });
-    },
+    }, 250),
     async deletePropertyMapping(mapping) {
       console.log('Need to delete', mapping)
+    },
+    async updatePreview() {
+      this.loadingNewPreview = true
+      this.previewObjectId = null
+      await this.fetchMappings()
+      this.loadingNewPreview = false
     }
   }
 }

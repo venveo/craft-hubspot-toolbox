@@ -53,7 +53,7 @@ class HubSpotToolbox extends Plugin
      */
     public static $plugin;
 
-    public $schemaVersion = '1.0.1';
+    public $schemaVersion = '1.0.0';
 
     public function init()
     {
@@ -83,7 +83,11 @@ class HubSpotToolbox extends Plugin
 
             $event->rules['hubspot-toolbox/ecommerce'] = 'hubspot-toolbox/ecommerce';
             $event->rules['hubspot-toolbox/ecommerce/settings'] = 'hubspot-toolbox/ecommerce/settings';
-            $event->rules['hubspot-toolbox/ecommerce/contacts'] = 'hubspot-toolbox/ecommerce/contacts';
+
+            $event->rules['hubspot-toolbox/ecommerce/contact-properties'] = 'hubspot-toolbox/ecommerce/contact-properties';
+            $event->rules['hubspot-toolbox/ecommerce/deal-properties'] = 'hubspot-toolbox/ecommerce/deal-properties';
+            $event->rules['hubspot-toolbox/ecommerce/lineitem-properties'] = 'hubspot-toolbox/ecommerce/lineitem-properties';
+            $event->rules['hubspot-toolbox/ecommerce/product-properties'] = 'hubspot-toolbox/ecommerce/product-properties';
 
             $event->rules['hubspot-toolbox/connection'] = 'hubspot-toolbox/connection/index';
         });

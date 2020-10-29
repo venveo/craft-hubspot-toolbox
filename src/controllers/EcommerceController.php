@@ -21,9 +21,30 @@ class EcommerceController extends Controller
         ]);
     }
 
-    public function actionContacts() {
+    public function actionContactProperties() {
         $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
-        return $this->renderTemplate('hubspot-toolbox/_ecommerce/contacts', [
+        return $this->renderTemplate('hubspot-toolbox/_ecommerce/contact-properties', [
+            'feature' => $feature
+        ]);
+    }
+
+    public function actionDealProperties() {
+        $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
+        return $this->renderTemplate('hubspot-toolbox/_ecommerce/deal-properties', [
+            'feature' => $feature
+        ]);
+    }
+
+    public function actionLineitemProperties() {
+        $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
+        return $this->renderTemplate('hubspot-toolbox/_ecommerce/lineitem-properties', [
+            'feature' => $feature
+        ]);
+    }
+
+    public function actionProductProperties() {
+        $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
+        return $this->renderTemplate('hubspot-toolbox/_ecommerce/product-properties', [
             'feature' => $feature
         ]);
     }
@@ -42,9 +63,9 @@ class EcommerceController extends Controller
         ]);
         if (HubSpotToolbox::$plugin->ecomm->saveStore($store)) {
             return $this->asJson($store);
-        } else {
-            \Craft::$app->response->setStatusCode(400);
-            return $this->asErrorJson($store->getFirstError('storeId'));
         }
+
+        \Craft::$app->response->setStatusCode(400);
+        return $this->asErrorJson($store->getFirstError('storeId'));
     }
 }

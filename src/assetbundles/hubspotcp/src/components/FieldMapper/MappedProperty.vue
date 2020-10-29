@@ -1,6 +1,6 @@
 <template>
   <tr>
-    <th scope="row" class="heading-cell thin">{{ mapping.objectProperty.label }}</th>
+    <th scope="row" class="heading-cell thin">{{ property.label }}</th>
     <td class="type-channel type-structure singleline-cell textual has-info code">
             <textarea rows="1" placeholder="Enter object template"
                       style="min-height: 36px;"
@@ -8,7 +8,7 @@
                       @input="$emit('update:template', $event.target.value)"
                       tabindex="0"></textarea>
     </td>
-    <th scope="row" class="heading-cell thin">{{mapping.preview}}</th>
+    <th scope="row" class="heading-cell thin">{{preview}}</th>
     <td class="thin action">
       <a class="delete icon" @click.prevent="$emit('delete')" title="Delete"></a>
     </td>
@@ -19,11 +19,16 @@
 
 export default {
   props: {
-    template: {
-      type: String
+    property: {
+      type: Object,
+      required: true
     },
-    mapping: {
-      type: Object
+    template: {
+      type: String,
+      required: true
+    },
+    preview: {
+      type: String
     }
   }
 };

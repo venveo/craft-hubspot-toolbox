@@ -17,14 +17,16 @@ export default {
             });
     },
 
-    getObjectMappings(objectType, context) {
-        return axios.get(Craft.getActionUrl('hubspot-toolbox/object-property-mapping/get-object-mappings', {objectType: objectType, context: context}))
+    getObjectMappings(mapper, previewObjectId) {
+        return axios.get(Craft.getActionUrl('hubspot-toolbox/object-property-mapping/get-object-mappings', {mapper, previewObjectId}))
     },
 
-    saveObjectMapping(mapping, previewElementId) {
+    saveObjectMapping(mapping, mapper, sourceTypeId, previewObjectId = null) {
         return axios.post(Craft.getActionUrl('hubspot-toolbox/object-property-mapping/save-object-mapping'), {
-            mapping: mapping,
-            previewElementId: previewElementId
+            mapping,
+            mapper,
+            sourceTypeId,
+            previewObjectId
         }, {
             headers: {
                 'X-CSRF-Token': Craft.csrfTokenValue,
@@ -32,18 +34,14 @@ export default {
         })
     },
 
-    publishObjectMappings(objectType, context) {
+    publishObjectMappings(mapper, sourceTypeId) {
         return axios.post(Craft.getActionUrl('hubspot-toolbox/object-property-mapping/publish-object-mapping'), {
-            objectType: objectType,
-            context: context
+            mapper,
+            sourceTypeId
         }, {
             headers: {
                 'X-CSRF-Token': Craft.csrfTokenValue,
             }
         })
     },
-
-    getPreview(objectType, orderId = null) {
-        return axios.get(Craft.getActionUrl('hubspot-toolbox/object-property-mapping/get-mapping-preview', {objectType: objectType, orderId: orderId}))
-    }
 }

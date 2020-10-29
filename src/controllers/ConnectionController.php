@@ -22,8 +22,8 @@ class ConnectionController extends Controller
 
     public function init()
     {
-        $this->provider = HubSpotToolbox::$plugin->oauth->getProvider();
         parent::init();
+        $this->provider = HubSpotToolbox::$plugin->oauth->getProvider();
     }
 
     public function actionAuthorize()
