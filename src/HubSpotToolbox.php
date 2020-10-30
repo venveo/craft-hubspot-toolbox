@@ -14,6 +14,7 @@ use Craft;
 use craft\base\Plugin;
 use craft\commerce\elements\Order;
 use craft\commerce\elements\Variant;
+use craft\console\Application as ConsoleApplication;
 use craft\events\ModelEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\services\Plugins;
@@ -59,6 +60,10 @@ class HubSpotToolbox extends Plugin
     {
         parent::init();
         self::$plugin = $this;
+
+        if (Craft::$app instanceof ConsoleApplication) {
+            $this->controllerNamespace = 'venveo\\hubspottoolbox\\controllers\\console';
+        }
 
         $this->setComponents([
             'ecomm' => EcommService::class,

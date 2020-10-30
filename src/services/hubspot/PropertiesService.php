@@ -19,6 +19,7 @@ use craft\helpers\DateTimeHelper;
 use venveo\hubspottoolbox\entities\ObjectProperty;
 use venveo\hubspottoolbox\models\HubSpotObjectMapping;
 use venveo\hubspottoolbox\propertymappers\PropertyMapperInterface;
+use venveo\hubspottoolbox\propertymappers\PropertyMapperPipeline;
 use venveo\hubspottoolbox\records\HubSpotObjectMapper;
 use venveo\hubspottoolbox\records\HubSpotObjectMapping as HubSpotObjectMappingRecord;
 use venveo\hubspottoolbox\traits\HubSpotTokenAuthorization;
@@ -97,6 +98,38 @@ class PropertiesService extends Component
         }
     }
 
+    public function _createPropertyMapperFromRecord(HubSpotObjectMapper $mapperRecord, $setProperties = false) {
+
+        $config = [
+            'type' => $mapperRecord->type,
+            'id' => $mapperRecord->id,
+            'sourceTypeId' => $mapperRecord->sourceTypeId,
+            'dateCreated' => $mapperRecord->dateCreated,
+            'dateUpdated' => $mapperRecord->dateUpdated,
+            'uid' => $mapperRecord->uid,
+        ];
+        $mappings = array_map(function ($mapping) {
+            return new HubSpotObjectMapping($mapping);
+        }, $mapperRecord->mappings);
+        $mapper = $this->_createPropertyMapper($config);
+        $mappingsByName = ArrayHelper::index($mappings, 'property');
+        $mapper->setPropertyMappings($mappingsByName);
+        if ($setProperties) {
+            $propertiesByName = ArrayHelper::index($this->getObjectProperties($mapper::getHubSpotObjectName()), 'name');
+            $mapper->setProperties($propertiesByName);
+        }
+        return $mapper;
+    }
+
+    public function getPropertyMappersByType($mapperType) {
+        /** @var HubSpotObjectMapper $mapperRecord */
+        $mapperRecords = $this->_createMapperQuery($mapperType)->with(['mappings'])->all();
+
+        return array_map(function ($mapper) {
+            return $this->_createPropertyMapperFromRecord($mapper);
+        }, $mapperRecords);
+    }
+
     /**
      * Gets or creates a property mapper from its type.
      * @param string $mapperType
@@ -114,27 +147,8 @@ class PropertiesService extends Component
                 'sourceTypeId' => $sourceTypeId
             ]);
             $mapperRecord->save();
-            $mappings = [];
-        } else {
-            $mappings = array_map(function ($mapping) {
-                return new HubSpotObjectMapping($mapping);
-            }, $mapperRecord->mappings);
         }
-        $config = [
-            'type' => $mapperRecord->type,
-            'id' => $mapperRecord->id,
-            'sourceTypeId' => $mapperRecord->sourceTypeId,
-            'dateCreated' => $mapperRecord->dateCreated,
-            'dateUpdated' => $mapperRecord->dateUpdated,
-            'uid' => $mapperRecord->uid,
-        ];
-        $mapper = $this->_createPropertyMapper($config);
-        $mappingsByName = ArrayHelper::index($mappings, 'property');
-        $mapper->setPropertyMappings($mappingsByName);
-        if ($setProperties) {
-            $propertiesByName = ArrayHelper::index($this->getObjectProperties($mapper::getHubSpotObjectName()), 'name');
-            $mapper->setProperties($propertiesByName);
-        }
+        $mapper = $this->_createPropertyMapperFromRecord($mapperRecord, $setProperties);
         return $mapper;
     }
 
@@ -179,5 +193,14 @@ class PropertiesService extends Component
             $query->andWhere(['sourceTypeId' => $sourceTypeId]);
         }
         return $query;
+    }
+
+    public function createPropertyMapperPipeline($type): PropertyMapperPipeline {
+
+        $mappers = $this->getPropertyMappersByType($type);
+        /** @var PropertyMapperPipeline $pipeline */
+        $pipeline = \Craft::createObject(PropertyMapperPipeline::class);
+        $pipeline->setPropertyMappers($mappers);
+        return $pipeline;
     }
 }
