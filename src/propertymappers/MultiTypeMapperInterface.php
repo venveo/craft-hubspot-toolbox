@@ -24,5 +24,5 @@ interface MultiTypeMapperInterface
      *
      * @return string
      */
-    public static function getMultiTypeName(): string;
+    public static function getSourceTypeName(): string;
 }

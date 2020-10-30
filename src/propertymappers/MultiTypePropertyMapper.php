@@ -16,16 +16,7 @@ abstract class MultiTypePropertyMapper extends PropertyMapper implements MultiTy
     {
         $fields = parent::fields();
         $fields[] = 'sourceTypes';
+        $fields[] = 'sourceTypeName';
         return $fields;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function extraFields()
-    {
-        $extra = parent::extraFields();
-        $extra[] = 'sourceTypes';
-        return $extra;
     }
 }

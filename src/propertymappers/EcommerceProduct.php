@@ -38,7 +38,9 @@ class EcommerceProduct extends MultiTypePropertyMapper implements PreviewablePro
     public function producePreviewObjectId()
     {
         $productType = $this->sourceTypeId;
-        $productType = Plugin::getInstance()->productTypes->getProductTypeById($productType);
+        if ($productType) {
+            $productType = Plugin::getInstance()->productTypes->getProductTypeById($productType);
+        }
         return Variant::find()->orderBy('RAND()')->typeId($productType)->one()->id ?? null;
     }
 
@@ -53,7 +55,7 @@ class EcommerceProduct extends MultiTypePropertyMapper implements PreviewablePro
         }, $productTypes);
     }
 
-    public static function getMultiTypeName(): string
+    public static function getSourceTypeName(): string
     {
         return 'Product Type';
     }
