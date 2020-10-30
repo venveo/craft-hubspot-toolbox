@@ -9,8 +9,8 @@
     <button class="btn icon search" :class="{'disabled': loadingNewPreview}" :disabled="loadingNewPreview" @click="updatePreview">New Preview</button>
     <button class="btn submit" @click.prevent="publishChanges">Publish Changes</button>
     <div class="flex-grow"></div>
-    <div v-if="sourceTypes.length"><label>Sub Type</label></div>
-    <div v-if="sourceTypes.length" class="select">
+    <div v-if="sourceTypeName"><label>{{sourceTypeName}}</label></div>
+    <div v-if="sourceTypes" class="select">
       <select v-model="sourceTypeId" @change="handleSourceTypeChanged">
         <option :value="null">Default</option>
         <option v-for="(sourceType, id) in sourceTypes" :value="id">{{sourceType.displayName}}</option>
@@ -79,7 +79,8 @@ export default {
 
       sourceTypeId: null,
 
-      sourceTypes: []
+      sourceTypes: null,
+      sourceTypeName: null
     }
   },
   mounted() {
@@ -90,8 +91,9 @@ export default {
       const {data} = await api.getObjectMappings(this.mapper, this.sourceTypeId, this.previewObjectId)
       this.properties = data.properties
       this.propertyMappings = data.propertyMappings
-      if (data.hasOwnProperty('sourceTypes')) {
+      if (Object.keys(data).includes('sourceTypes')) {
         this.sourceTypes = data.sourceTypes
+        this.sourceTypeName = data.sourceTypeName
       }
       if (!this.previewObjectId) {
         this.previewObjectId = data.sourceId
