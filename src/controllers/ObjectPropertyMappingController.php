@@ -1,4 +1,8 @@
 <?php
+/*
+ *  @link      https://www.venveo.com
+ *  @copyright Copyright (c) 2020 Venveo
+ */
 
 namespace venveo\hubspottoolbox\controllers;
 
@@ -14,8 +18,13 @@ class ObjectPropertyMappingController extends Controller
     public function actionGetObjectMappings()
     {
         $mapper = $this->getMapperFromRequest();
-        $mapper->renderTemplates();
-        $data = $mapper->toArray([], ['properties', 'propertyMappings', 'propertyMappings.renderedValue', 'sourceId']);
+        $attributes = ['properties', 'propertyMappings', 'propertyMappings.renderedValue', 'sourceId'];
+        if ($mapper instanceof PreviewablePropertyMapperInterface) {
+            $attributes[] = 'initialPreviewObjectId';
+            $mapper->setSourceId($mapper->getInitialPreviewObjectId());
+            $mapper->renderTemplates();
+        }
+        $data = $mapper->toArray([], $attributes);
         return $this->asJson($data);
     }
 
@@ -50,11 +59,11 @@ class ObjectPropertyMappingController extends Controller
     {
         $mapperType = \Craft::$app->request->getRequiredParam('mapper');
         $sourceTypeId = \Craft::$app->request->getParam('sourceTypeId');
-        $previewId = \Craft::$app->request->getParam('previewId');
+        $previewId = \Craft::$app->request->getParam('previewObjectId');
 
         if (class_exists($mapperType) && in_array(PropertyMapperInterface::class, class_implements($mapperType), true)) {
             $mapper = HubSpotToolbox::$plugin->properties->getMapper($mapperType, $sourceTypeId);
-            if($mapper instanceof PreviewablePropertyMapperInterface) {
+            if($previewId && $mapper instanceof PreviewablePropertyMapperInterface) {
                 if (!$previewId) {
                     $previewId = $mapper->getInitialPreviewObjectId();
                 }

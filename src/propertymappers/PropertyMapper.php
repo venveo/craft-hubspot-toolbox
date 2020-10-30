@@ -1,11 +1,39 @@
 <?php
+/*
+ *  @link      https://www.venveo.com
+ *  @copyright Copyright (c) 2020 Venveo
+ */
+
 namespace venveo\hubspottoolbox\propertymappers;
 
+use Craft;
 use craft\base\Component;
 use venveo\hubspottoolbox\entities\ObjectProperty;
 use venveo\hubspottoolbox\models\HubSpotObjectMapping;
 
-abstract class PropertyMapper extends Component implements PropertyMapperInterface {
+
+abstract class PropertyMapper extends Component implements PropertyMapperInterface
+{
+    /**
+     * @var int
+     */
+    public $id;
+    /**
+     * @var mixed
+     */
+    public $sourceTypeId;
+    /**
+     * @var string
+     */
+    public $uid;
+    /**
+     * @var \DateTime
+     */
+    public $dateCreated;
+    /**
+     * @var \DateTime
+     */
+    public $dateUpdated;
     /**
      * @var HubSpotObjectMapping[]
      */
@@ -17,28 +45,32 @@ abstract class PropertyMapper extends Component implements PropertyMapperInterfa
     protected $_type = null;
     protected $sourceId;
 
-    public $id;
-    public $sourceTypeId;
-
-    public $uid;
-    public $dateCreated;
-    public $dateUpdated;
-
-    public function getType() {
+    /**
+     * @inheritdoc
+     */
+    public function getType(): string
+    {
         return $this->_type ?? static::class;
     }
 
-    public function setType($type) {
+    /**
+     * @inheritdoc
+     */
+    public function setType(string $type)
+    {
         $this->_type = $type;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getPropertyMappings(): array
     {
         return $this->propertyMappings;
     }
 
     /**
-     * @param array $propertyMappings
+     * @inheritdoc
      */
     public function setPropertyMappings(array $propertyMappings): void
     {
@@ -46,7 +78,7 @@ abstract class PropertyMapper extends Component implements PropertyMapperInterfa
     }
 
     /**
-     * @return array
+     * @inheritdoc
      */
     public function getProperties(): array
     {
@@ -54,21 +86,52 @@ abstract class PropertyMapper extends Component implements PropertyMapperInterfa
     }
 
     /**
-     * @param array $properties
+     * @inheritdoc
      */
     public function setProperties(array $properties): void
     {
         $this->properties = $properties;
     }
 
-    public function setSourceId($id) {
-        $this->sourceId = $id;
-    }
-
-    public function getSourceId() {
+    /**
+     * @inheritdoc
+     */
+    public function getSourceId()
+    {
         return $this->sourceId;
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function setSourceId($id)
+    {
+        $this->sourceId = $id;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function renderTemplates()
+    {
+        foreach ($this->propertyMappings as $property) {
+            $this->renderProperty($property);
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function renderProperty(HubSpotObjectMapping $mapping)
+    {
+        $renderedTemplate = Craft::$app->view->renderObjectTemplate($mapping->template, [],
+            $this->getTemplateParams());
+        $mapping->setRenderedValue($renderedTemplate);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function fields()
     {
         $fields = parent::fields();
@@ -76,6 +139,9 @@ abstract class PropertyMapper extends Component implements PropertyMapperInterfa
         return $fields;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function extraFields()
     {
         $extra = parent::extraFields();
@@ -83,20 +149,9 @@ abstract class PropertyMapper extends Component implements PropertyMapperInterfa
         $extra[] = 'properties';
         $extra[] = 'propertyMappings';
         $extra[] = 'sourceId';
+        if ($this instanceof PreviewablePropertyMapperInterface) {
+            $extra[] = 'initialPreviewObjectId';
+        }
         return $extra;
     }
-
-    public function renderProperty(HubSpotObjectMapping $mapping) {
-        $renderedTemplate = \Craft::$app->view->renderObjectTemplate($mapping->template, [],
-            $this->getTemplateParams());
-        $mapping->setRenderedValue($renderedTemplate);
-    }
-
-    public function renderTemplates()
-    {
-        foreach($this->propertyMappings as $property) {
-            $this->renderProperty($property);
-        }
-    }
-
 }

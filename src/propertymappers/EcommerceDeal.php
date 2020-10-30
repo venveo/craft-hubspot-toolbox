@@ -3,9 +3,12 @@
 namespace venveo\hubspottoolbox\propertymappers;
 
 use craft\commerce\elements\Order;
+use venveo\hubspottoolbox\traits\PreviewableMapperTrait;
 
 class EcommerceDeal extends PropertyMapper implements PreviewablePropertyMapperInterface
 {
+    use PreviewableMapperTrait;
+
     public static function getHubSpotObjectName(): string
     {
         return 'deals';
@@ -25,7 +28,7 @@ class EcommerceDeal extends PropertyMapper implements PreviewablePropertyMapperI
         ];
     }
 
-    public function getInitialPreviewObjectId()
+    public function producePreviewObjectId()
     {
         return Order::find()->orderBy('RAND()')->limit(1)->ids()[0] ?? null;
     }

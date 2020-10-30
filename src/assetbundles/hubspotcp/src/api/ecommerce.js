@@ -17,8 +17,8 @@ export default {
             });
     },
 
-    getObjectMappings(mapper, previewObjectId) {
-        return axios.get(Craft.getActionUrl('hubspot-toolbox/object-property-mapping/get-object-mappings', {mapper, previewObjectId}))
+    getObjectMappings(mapper, sourceTypeId, previewObjectId) {
+        return axios.get(Craft.getActionUrl('hubspot-toolbox/object-property-mapping/get-object-mappings', {mapper, sourceTypeId, previewObjectId}))
     },
 
     saveObjectMapping(mapping, mapper, sourceTypeId, previewObjectId = null) {

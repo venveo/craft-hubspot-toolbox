@@ -41,8 +41,7 @@ Craft.HubSpot.FieldMapper = Garnish.Base.extend({
         defaults: {
             container: null,
             props: {
-                mapper: null,
-                sourceTypeId: null
+                mapper: null
             }
         }
     });

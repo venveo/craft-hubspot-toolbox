@@ -1,8 +1,21 @@
+<!--
+  -  @link      https://www.venveo.com
+  -  @copyright Copyright (c) 2020 Venveo
+  -->
+
 <template>
   <div class="flex">
     <button class="btn icon add" @click="showingPropertyPicker = !showingPropertyPicker">Add Property</button>
     <button class="btn icon search" :class="{'disabled': loadingNewPreview}" :disabled="loadingNewPreview" @click="updatePreview">New Preview</button>
     <button class="btn submit" @click.prevent="publishChanges">Publish Changes</button>
+    <div class="flex-grow"></div>
+    <div v-if="sourceTypes.length"><label>Sub Type</label></div>
+    <div v-if="sourceTypes.length" class="select">
+      <select v-model="sourceTypeId" @change="handleSourceTypeChanged">
+        <option :value="null">Default</option>
+        <option v-for="(sourceType, id) in sourceTypes" :value="id">{{sourceType.displayName}}</option>
+      </select>
+    </div>
   </div>
   <div v-if="showingPropertyPicker">
     <div class="pane flex">
@@ -13,7 +26,7 @@
         </select>
       </div>
       <div>
-        <button class="btn icon add" @click.prevent="handleAddProperty">Add</button>
+        <button class="btn icon add" :class="{'disabled': loadingAddProperty, 'loading': loadingAddProperty}" :disabled="loadingAddProperty" @click.prevent="handleAddProperty">Add</button>
       </div>
     </div>
     <hr>
@@ -50,8 +63,7 @@ export default {
   name: 'FieldMapper',
   components: {MappedProperty},
   props: {
-    mapper: String,
-    sourceTypeId: Number
+    mapper: String
   },
   data() {
     return {
@@ -62,7 +74,12 @@ export default {
       selectedPropertyToAdd: '',
       previewObjectId: null,
 
-      loadingNewPreview: false
+      loadingNewPreview: false,
+      loadingAddProperty: false,
+
+      sourceTypeId: null,
+
+      sourceTypes: []
     }
   },
   mounted() {
@@ -70,17 +87,28 @@ export default {
   },
   methods: {
     async fetchMappings() {
-      const {data} = await api.getObjectMappings(this.mapper, this.previewObjectId)
+      const {data} = await api.getObjectMappings(this.mapper, this.sourceTypeId, this.previewObjectId)
       this.properties = data.properties
       this.propertyMappings = data.propertyMappings
-      this.previewObjectId = data.previewObjectId
+      if (data.hasOwnProperty('sourceTypes')) {
+        this.sourceTypes = data.sourceTypes
+      }
+      if (!this.previewObjectId) {
+        this.previewObjectId = data.sourceId
+      }
+    },
+    handleSourceTypeChanged: async function() {
+      await this.fetchMappings();
     },
     handleAddProperty: async function () {
+      this.loadingAddProperty = true
       const mapping = {
         property: this.selectedPropertyToAdd,
       }
       await api.saveObjectMapping(mapping, this.mapper, this.sourceTypeId, this.previewObjectId);
-      this.fetchMappings();
+      await this.fetchMappings();
+      this.loadingAddProperty = false
+      this.selectedPropertyToAdd = '';
     },
     handleObjectTemplateChanged(mapped, e) {
       const index = this.propertyMappings.findIndex((e) => {
@@ -94,8 +122,8 @@ export default {
     },
     async publishChanges() {
       await api.publishObjectMappings(this.mapper, this.sourceTypeId);
+      await this.fetchMappings();
       alert('Published');
-      this.fetchMappings();
     },
     handleTemplateChange: debounce(function(mapping) {
       api.saveObjectMapping(mapping, this.mapper, this.sourceTypeId, this.previewObjectId).then(v => {
