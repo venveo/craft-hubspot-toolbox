@@ -202,7 +202,7 @@ class PropertiesService extends Component
     protected function _createMapperQuery($mapperType, $sourceTypeId = null): ActiveQuery
     {
         $query = HubSpotObjectMapperRecord::find()->where(['=', 'type', $mapperType]);
-        if ($sourceTypeId) {
+        if ($sourceTypeId !== null) {
             $query->andWhere(['sourceTypeId' => $sourceTypeId]);
         }
         return $query;
