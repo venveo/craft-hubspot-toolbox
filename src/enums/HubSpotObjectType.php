@@ -5,6 +5,6 @@ abstract class HubSpotObjectType
 {
     const Product = 'PRODUCT';
     const Contact = 'CONTACT';
-    const Deal = 'Deal';
+    const Deal = 'DEAL';
     const LineItem = 'LINE_ITEM';
 }
