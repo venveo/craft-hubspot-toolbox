@@ -59,7 +59,7 @@ class Settings extends Model
     public function rules()
     {
         return [
-            [['appId', 'clientId', 'clientSecret', 'devApiKey'], 'required']
+            [['appId', 'clientId', 'clientSecret', 'devApiKey', 'apiKey'], 'required']
         ];
     }
 }
