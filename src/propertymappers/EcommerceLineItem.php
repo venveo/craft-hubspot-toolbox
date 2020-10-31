@@ -9,6 +9,7 @@ namespace venveo\hubspottoolbox\propertymappers;
 use craft\commerce\elements\Order;
 use craft\commerce\Plugin;
 use venveo\hubspottoolbox\enums\HubSpotObjectType;
+use venveo\hubspottoolbox\models\HubSpotObjectMapping;
 use venveo\hubspottoolbox\traits\PreviewableMapperTrait;
 
 class EcommerceLineItem extends PropertyMapper implements PreviewablePropertyMapperInterface
@@ -42,5 +43,17 @@ class EcommerceLineItem extends PropertyMapper implements PreviewablePropertyMap
     {
         $order = Order::find()->orderBy('RAND()')->hasLineItems()->one();
         return $order->lineItems[0]->id;
+    }
+
+    public function getRecommendedMappings(): array
+    {
+        $mappings = [];
+        $mappings[] = new HubSpotObjectMapping(['property' => 'price', 'template' => '{lineitem.salePrice}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'quantity', 'template' => '{lineitem.qty}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'name', 'template' => '{lineitem.purchasable.title}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'description', 'template' => '{lineitem.description}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'discount', 'template' => '{lineitem.discount}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'tax', 'template' => '{lineitem.tax}']);
+        return $mappings;
     }
 }

@@ -132,6 +132,13 @@ abstract class PropertyMapper extends Component implements PropertyMapperInterfa
     /**
      * @inheritdoc
      */
+    public function getRecommendedMappings(): array {
+        return [];
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function fields()
     {
         $fields = parent::fields();

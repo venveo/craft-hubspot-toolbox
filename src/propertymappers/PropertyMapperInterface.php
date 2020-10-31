@@ -114,4 +114,11 @@ interface PropertyMapperInterface extends \ArrayAccess, Arrayable, \IteratorAggr
      * Renders all property mappings via the renderProperty() method
      */
     public function renderTemplates();
+
+    /**
+     * Returns a list of recommended object mappings for this mapper
+     *
+     * @return HubSpotObjectMapping[]
+     */
+    public function getRecommendedMappings(): array;
 }

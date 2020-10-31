@@ -10,6 +10,7 @@ use craft\commerce\elements\Variant;
 use craft\commerce\models\ProductType;
 use craft\commerce\Plugin;
 use venveo\hubspottoolbox\enums\HubSpotObjectType;
+use venveo\hubspottoolbox\models\HubSpotObjectMapping;
 use venveo\hubspottoolbox\traits\PreviewableMapperTrait;
 
 class EcommerceProduct extends MultiTypePropertyMapper implements PreviewablePropertyMapperInterface
@@ -64,5 +65,15 @@ class EcommerceProduct extends MultiTypePropertyMapper implements PreviewablePro
     public static function getSourceTypeName(): string
     {
         return 'Product Type';
+    }
+
+    public function getRecommendedMappings(): array
+    {
+        $mappings = [];
+        $mappings[] = new HubSpotObjectMapping(['property' => 'price', 'template' => '{variant.price}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'description', 'template' => '{variant.product.description}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'name', 'template' => '{variant.title}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'hs_sku', 'template' => '{variant.sku}']);
+        return $mappings;
     }
 }

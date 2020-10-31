@@ -5,6 +5,7 @@ namespace venveo\hubspottoolbox\propertymappers;
 use craft\commerce\elements\Order;
 use craft\commerce\Plugin;
 use venveo\hubspottoolbox\enums\HubSpotObjectType;
+use venveo\hubspottoolbox\models\HubSpotObjectMapping;
 use venveo\hubspottoolbox\traits\PreviewableMapperTrait;
 
 class EcommerceDeal extends MultiTypePropertyMapper
@@ -55,5 +56,13 @@ class EcommerceDeal extends MultiTypePropertyMapper
     public static function getSourceTypeName(): string
     {
         return 'Order Status';
+    }
+
+    public function getRecommendedMappings(): array
+    {
+        $mappings = [];
+        $mappings[] = new HubSpotObjectMapping(['property' => 'dealname', 'template' => '{order.number}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'amount', 'template' => '{order.total}']);
+        return $mappings;
     }
 }
