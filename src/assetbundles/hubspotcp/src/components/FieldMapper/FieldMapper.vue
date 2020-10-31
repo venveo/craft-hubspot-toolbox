@@ -18,7 +18,8 @@
     </div>
   </div>
   <div v-if="showingPropertyPicker">
-    <div class="pane flex">
+    <div class="pane">
+      <div class="flex">
       <div class="select">
         <select v-model="selectedPropertyToAdd">
           <option disabled selected value="">Select Property</option>
@@ -27,6 +28,10 @@
       </div>
       <div>
         <button class="btn icon add" :class="{'disabled': loadingAddProperty, 'loading': loadingAddProperty}" :disabled="loadingAddProperty" @click.prevent="handleAddProperty">Add</button>
+      </div>
+      </div>
+      <div v-if="selectedPropertyToAdd" class="readable">
+        <p>{{properties[selectedPropertyToAdd].description}}</p>
       </div>
     </div>
     <hr>
@@ -57,7 +62,7 @@
 <script>
 import api from '../../api/ecommerce.js'
 import MappedProperty from "./MappedProperty.vue";
-import {debounce} from "lodash"
+import {debounce, omitBy} from "lodash"
 
 export default {
   name: 'FieldMapper',
@@ -89,7 +94,7 @@ export default {
   methods: {
     async fetchMappings() {
       const {data} = await api.getObjectMappings(this.mapper, this.sourceTypeId, this.previewObjectId)
-      this.properties = data.properties
+      this.properties = omitBy(data.properties, prop => prop.readOnlyValue)
       this.propertyMappings = data.propertyMappings
       if (Object.keys(data).includes('sourceTypes')) {
         this.sourceTypes = data.sourceTypes
