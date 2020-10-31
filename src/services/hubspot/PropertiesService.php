@@ -12,15 +12,18 @@ namespace venveo\hubspottoolbox\services\hubspot;
 
 use Craft;
 use craft\base\Component;
+use craft\db\ActiveQuery;
+use craft\db\Query;
 use craft\errors\MissingComponentException;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Component as ComponentHelper;
 use craft\helpers\DateTimeHelper;
 use venveo\hubspottoolbox\entities\ObjectProperty;
+use venveo\hubspottoolbox\HubSpotToolbox;
 use venveo\hubspottoolbox\models\HubSpotObjectMapping;
 use venveo\hubspottoolbox\propertymappers\PropertyMapperInterface;
 use venveo\hubspottoolbox\propertymappers\PropertyMapperPipeline;
-use venveo\hubspottoolbox\records\HubSpotObjectMapper;
+use venveo\hubspottoolbox\records\HubSpotObjectMapper as HubSpotObjectMapperRecord;
 use venveo\hubspottoolbox\records\HubSpotObjectMapping as HubSpotObjectMappingRecord;
 use venveo\hubspottoolbox\traits\HubSpotTokenAuthorization;
 
@@ -75,11 +78,16 @@ class PropertiesService extends Component
         return true;
     }
 
-    public function publishMappings(PropertyMapperInterface $mapper) {
-        $record = HubSpotObjectMapper::findOne($mapper->id);
+    public function publishMappings(PropertyMapperInterface $mapper)
+    {
+        $record = HubSpotObjectMapperRecord::findOne($mapper->id);
         $unpublishedMappings = $record->getUnpublishedMappings()->all();
         $unpublishedMappingProperties = ArrayHelper::getColumn($unpublishedMappings, 'property');
-        $publishedMappings = $record->getPublishedMappings()->andWhere(['IN', 'property', $unpublishedMappingProperties])->all();
+        $publishedMappings = $record->getPublishedMappings()->andWhere([
+            'IN',
+            'property',
+            $unpublishedMappingProperties
+        ])->all();
 
         $transaction = Craft::$app->getDb()->beginTransaction();
         try {
@@ -87,7 +95,7 @@ class PropertiesService extends Component
                 $mapping->delete();
             }
             /** @var HubSpotObjectMappingRecord $unpublishedMapping */
-            foreach($unpublishedMappings as $unpublishedMapping) {
+            foreach ($unpublishedMappings as $unpublishedMapping) {
                 $unpublishedMapping->datePublished = DateTimeHelper::currentUTCDateTime();
                 $unpublishedMapping->save();
             }
@@ -98,7 +106,8 @@ class PropertiesService extends Component
         }
     }
 
-    public function _createPropertyMapperFromRecord(HubSpotObjectMapper $mapperRecord, $setProperties = false) {
+    public function _createPropertyMapperFromRecord(HubSpotObjectMapperRecord $mapperRecord, $setProperties = false)
+    {
 
         $config = [
             'type' => $mapperRecord->type,
@@ -121,8 +130,9 @@ class PropertiesService extends Component
         return $mapper;
     }
 
-    public function getPropertyMappersByType($mapperType) {
-        /** @var HubSpotObjectMapper $mapperRecord */
+    public function getPropertyMappersByType($mapperType)
+    {
+        /** @var HubSpotObjectMapperRecord $mapperRecord */
         $mapperRecords = $this->_createMapperQuery($mapperType)->with(['mappings'])->all();
 
         return array_map(function ($mapper) {
@@ -137,12 +147,15 @@ class PropertiesService extends Component
      * @param bool $setProperties
      * @return PropertyMapperInterface
      */
-    public function getOrCreateObjectMapper(string $mapperType, $sourceTypeId = null, $setProperties = false): PropertyMapperInterface
-    {
-        /** @var HubSpotObjectMapper $mapperRecord */
+    public function getOrCreateObjectMapper(
+        string $mapperType,
+        $sourceTypeId = null,
+        $setProperties = false
+    ): PropertyMapperInterface {
+        /** @var HubSpotObjectMapperRecord $mapperRecord */
         $mapperRecord = $this->_createMapperQuery($mapperType, $sourceTypeId)->with(['mappings'])->one();
         if (!$mapperRecord) {
-            $mapperRecord = new HubSpotObjectMapper([
+            $mapperRecord = new HubSpotObjectMapperRecord([
                 'type' => $mapperType,
                 'sourceTypeId' => $sourceTypeId
             ]);
@@ -173,9 +186,9 @@ class PropertiesService extends Component
     /**
      * @param $objectType
      * @param null $context
-     * @return \craft\db\ActiveQuery
+     * @return ActiveQuery
      */
-    protected function _createMappingQuery(): \craft\db\ActiveQuery
+    protected function _createMappingQuery(): ActiveQuery
     {
         return HubSpotObjectMappingRecord::find();
     }
@@ -184,23 +197,39 @@ class PropertiesService extends Component
     /**
      * @param $type
      * @param null $sourceTypeId
-     * @return \craft\db\ActiveQuery
+     * @return ActiveQuery
      */
-    protected function _createMapperQuery($type, $sourceTypeId = null): \craft\db\ActiveQuery
+    protected function _createMapperQuery($mapperType, $sourceTypeId = null): ActiveQuery
     {
-        $query = HubSpotObjectMapper::find()->where(['=', 'type', $type]);
+        $query = HubSpotObjectMapperRecord::find()->where(['=', 'type', $mapperType]);
         if ($sourceTypeId) {
             $query->andWhere(['sourceTypeId' => $sourceTypeId]);
         }
         return $query;
     }
 
-    public function createPropertyMapperPipeline($type): PropertyMapperPipeline {
+    public function createPropertyMapperPipeline($mapperType): PropertyMapperPipeline
+    {
 
-        $mappers = $this->getPropertyMappersByType($type);
+        $mappers = $this->getPropertyMappersByType($mapperType);
         /** @var PropertyMapperPipeline $pipeline */
         $pipeline = \Craft::createObject(PropertyMapperPipeline::class);
         $pipeline->setPropertyMappers($mappers);
         return $pipeline;
+    }
+
+    /**
+     * Produces an array of all unique, published property names for a mapper type
+     *
+     * @param string $mapperType
+     * @return string[]
+     */
+    public function getAllUniqueMappedPropertyNames(string $mapperType): array
+    {
+        return (new Query())->select(['mapping.property'])->distinct(true)->from(['mapping' => HubSpotObjectMappingRecord::tableName()])
+            ->leftJoin(['mapper' => HubSpotObjectMapperRecord::tableName()], '[[mapper.id]] = [[mapping.mapperId]]')
+            ->where(['mapper.type' => $mapperType])
+            ->andWhere(['NOT', ['mapping.datePublished' => null]])
+            ->column();
     }
 }
