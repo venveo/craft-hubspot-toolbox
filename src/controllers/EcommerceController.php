@@ -9,11 +9,13 @@ use venveo\hubspottoolbox\HubSpotToolbox;
 
 class EcommerceController extends Controller
 {
-    public function actionIndex() {
+    public function actionIndex()
+    {
         return $this->redirect(UrlHelper::cpUrl('hubspot-toolbox/ecommerce/settings'));
     }
 
-    public function actionSettings() {
+    public function actionSettings()
+    {
         $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
         return $this->renderTemplate('hubspot-toolbox/_ecommerce/settings', [
             'feature' => $feature,
@@ -21,28 +23,32 @@ class EcommerceController extends Controller
         ]);
     }
 
-    public function actionContactProperties() {
+    public function actionContactProperties()
+    {
         $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
         return $this->renderTemplate('hubspot-toolbox/_ecommerce/contact-properties', [
             'feature' => $feature
         ]);
     }
 
-    public function actionDealProperties() {
+    public function actionDealProperties()
+    {
         $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
         return $this->renderTemplate('hubspot-toolbox/_ecommerce/deal-properties', [
             'feature' => $feature
         ]);
     }
 
-    public function actionLineitemProperties() {
+    public function actionLineitemProperties()
+    {
         $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
         return $this->renderTemplate('hubspot-toolbox/_ecommerce/lineitem-properties', [
             'feature' => $feature
         ]);
     }
 
-    public function actionProductProperties() {
+    public function actionProductProperties()
+    {
         $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
         return $this->renderTemplate('hubspot-toolbox/_ecommerce/product-properties', [
             'feature' => $feature
