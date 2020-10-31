@@ -8,7 +8,7 @@ use venveo\hubspottoolbox\enums\HubSpotObjectType;
 use venveo\hubspottoolbox\models\HubSpotObjectMapping;
 use venveo\hubspottoolbox\traits\PreviewableMapperTrait;
 
-class EcommerceDeal extends MultiTypePropertyMapper
+class EcommerceDeal extends MultiTypePropertyMapper implements PreviewablePropertyMapperInterface
 {
     use PreviewableMapperTrait;
 
@@ -38,7 +38,7 @@ class EcommerceDeal extends MultiTypePropertyMapper
 
     public function producePreviewObjectId()
     {
-        return Order::find()->orderBy('RAND()')->limit(1)->ids()[0] ?? null;
+        return Order::find()->orderBy('RAND()')->one()->id;
     }
 
     public static function getSourceTypes(): array
@@ -61,7 +61,7 @@ class EcommerceDeal extends MultiTypePropertyMapper
     public function getRecommendedMappings(): array
     {
         $mappings = [];
-        $mappings[] = new HubSpotObjectMapping(['property' => 'dealname', 'template' => '{order.number}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'dealname', 'template' => '{order.reference}']);
         $mappings[] = new HubSpotObjectMapping(['property' => 'amount', 'template' => '{order.total}']);
         return $mappings;
     }
