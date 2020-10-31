@@ -4,6 +4,7 @@ namespace venveo\hubspottoolbox\propertymappers;
 
 use craft\commerce\elements\Order;
 use craft\commerce\Plugin;
+use venveo\hubspottoolbox\enums\HubSpotObjectType;
 use venveo\hubspottoolbox\traits\PreviewableMapperTrait;
 
 class EcommerceDeal extends MultiTypePropertyMapper
@@ -13,6 +14,11 @@ class EcommerceDeal extends MultiTypePropertyMapper
     public static function getHubSpotObjectName(): string
     {
         return 'deals';
+    }
+
+    public static function getHubSpotObjectType(): string
+    {
+        return HubSpotObjectType::Deal;
     }
 
     public static function getObjectContext(): string

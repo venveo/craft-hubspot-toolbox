@@ -55,6 +55,13 @@ interface PropertyMapperInterface extends \ArrayAccess, Arrayable, \IteratorAggr
     public static function getHubSpotObjectName(): string;
 
     /**
+     * What is the object type - this is usually the singular form of the object name
+     *
+     * @return string
+     */
+    public static function getHubSpotObjectType(): string;
+
+    /**
      * What is the context for this mapper?
      *
      * @return string

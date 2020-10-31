@@ -8,6 +8,7 @@ namespace venveo\hubspottoolbox\propertymappers;
 
 use craft\commerce\elements\Order;
 use craft\commerce\Plugin;
+use venveo\hubspottoolbox\enums\HubSpotObjectType;
 use venveo\hubspottoolbox\traits\PreviewableMapperTrait;
 
 class EcommerceLineItem extends PropertyMapper implements PreviewablePropertyMapperInterface
@@ -17,6 +18,11 @@ class EcommerceLineItem extends PropertyMapper implements PreviewablePropertyMap
     public static function getHubSpotObjectName(): string
     {
         return 'line_items';
+    }
+
+    public static function getHubSpotObjectType(): string
+    {
+        return HubSpotObjectType::LineItem;
     }
 
     public static function getObjectContext(): string

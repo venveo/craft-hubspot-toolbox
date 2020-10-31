@@ -9,6 +9,7 @@ namespace venveo\hubspottoolbox\propertymappers;
 use craft\commerce\elements\Variant;
 use craft\commerce\models\ProductType;
 use craft\commerce\Plugin;
+use venveo\hubspottoolbox\enums\HubSpotObjectType;
 use venveo\hubspottoolbox\traits\PreviewableMapperTrait;
 
 class EcommerceProduct extends MultiTypePropertyMapper implements PreviewablePropertyMapperInterface
@@ -19,6 +20,11 @@ class EcommerceProduct extends MultiTypePropertyMapper implements PreviewablePro
     public static function getHubSpotObjectName(): string
     {
         return 'products';
+    }
+
+    public static function getHubSpotObjectType(): string
+    {
+        return HubSpotObjectType::Product;
     }
 
     public static function getObjectContext(): string

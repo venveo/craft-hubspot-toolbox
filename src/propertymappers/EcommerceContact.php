@@ -3,6 +3,7 @@
 namespace venveo\hubspottoolbox\propertymappers;
 
 use craft\commerce\elements\Order;
+use venveo\hubspottoolbox\enums\HubSpotObjectType;
 use venveo\hubspottoolbox\traits\PreviewableMapperTrait;
 
 class EcommerceContact extends PropertyMapper implements PreviewablePropertyMapperInterface
@@ -12,6 +13,11 @@ class EcommerceContact extends PropertyMapper implements PreviewablePropertyMapp
     public static function getHubSpotObjectName(): string
     {
         return 'contacts';
+    }
+
+    public static function getHubSpotObjectType(): string
+    {
+        return HubSpotObjectType::Contact;
     }
 
     public static function getObjectContext(): string
