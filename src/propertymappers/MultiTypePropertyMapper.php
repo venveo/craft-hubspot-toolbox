@@ -7,8 +7,20 @@
 namespace venveo\hubspottoolbox\propertymappers;
 
 
+use craft\helpers\ArrayHelper;
+
 abstract class MultiTypePropertyMapper extends PropertyMapper implements MultiTypeMapperInterface
 {
+    /**
+     * Gets all sources types indexed by ID. These should be defined via  defineSourceTypes()
+     *
+     * @return MapperSourceType[] indexed by id
+     */
+    final public static function getSourceTypes(): array
+    {
+        return ArrayHelper::index(static::defineSourceTypes(), 'id');
+    }
+
     /**
      * @inheritdoc
      */

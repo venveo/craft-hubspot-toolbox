@@ -13,7 +13,7 @@
     <div v-if="sourceTypes" class="select">
       <select v-model="sourceTypeId" @change="handleSourceTypeChanged">
         <option :value="null">Default</option>
-        <option v-for="(sourceType, id) in sourceTypes" :value="id">{{sourceType.displayName}}</option>
+        <option v-for="(sourceType) in sourceTypes" :value="sourceType.id">{{sourceType.displayName}}</option>
       </select>
     </div>
   </div>

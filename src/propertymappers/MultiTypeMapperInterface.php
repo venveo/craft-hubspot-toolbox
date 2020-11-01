@@ -6,10 +6,6 @@
 
 namespace venveo\hubspottoolbox\propertymappers;
 
-use venveo\hubspottoolbox\entities\ObjectProperty;
-use venveo\hubspottoolbox\models\HubSpotObjectMapping;
-use yii\base\Arrayable;
-
 interface MultiTypeMapperInterface
 {
     /**
@@ -25,4 +21,11 @@ interface MultiTypeMapperInterface
      * @return string
      */
     public static function getSourceTypeName(): string;
+
+    /**
+     * Return any source types for this mapper
+     *
+     * @return MapperSourceType[]
+     */
+    public static function defineSourceTypes(): array;
 }
