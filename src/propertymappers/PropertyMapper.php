@@ -41,9 +41,8 @@ abstract class PropertyMapper extends Component implements PropertyMapperInterfa
     /**
      * @var ObjectProperty[]
      */
-    protected $properties = [];
+    protected array $properties = [];
     protected $_type = null;
-    protected $sourceId;
 
     /**
      * @inheritdoc
@@ -96,43 +95,30 @@ abstract class PropertyMapper extends Component implements PropertyMapperInterfa
     /**
      * @inheritdoc
      */
-    public function getSourceId()
+    public function renderTemplates($source): array
     {
-        return $this->sourceId;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function setSourceId($id)
-    {
-        $this->sourceId = $id;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function renderTemplates()
-    {
+        $results = [];
         foreach ($this->propertyMappings as $property) {
-            $this->renderProperty($property);
+            $results[$property->property] = $this->renderProperty($property, $source);
         }
+        return $results;
     }
 
     /**
      * @inheritdoc
      */
-    public function renderProperty(HubSpotObjectMapping $mapping)
+    public function renderProperty(HubSpotObjectMapping $mapping, $source): string
     {
         $renderedTemplate = Craft::$app->view->renderObjectTemplate($mapping->template, [],
-            $this->getTemplateParams());
-        $mapping->setRenderedValue($renderedTemplate);
+            $this->getTemplateParams($source));
+        return $renderedTemplate;
     }
 
     /**
      * @inheritdoc
      */
-    public function getRecommendedMappings(): array {
+    public function getRecommendedMappings(): array
+    {
         return [];
     }
 
@@ -155,10 +141,17 @@ abstract class PropertyMapper extends Component implements PropertyMapperInterfa
         $extra[] = 'type';
         $extra[] = 'properties';
         $extra[] = 'propertyMappings';
-        $extra[] = 'sourceId';
         if ($this instanceof PreviewablePropertyMapperInterface) {
             $extra[] = 'initialPreviewObjectId';
         }
         return $extra;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function canBeAppliedToSource($source): bool
+    {
+        return true;
     }
 }

@@ -34,9 +34,9 @@ class EcommerceProduct extends MultiTypePropertyMapper implements PreviewablePro
     }
 
 
-    public function getTemplateParams(): array
+    public function getTemplateParams($source): array
     {
-        $variant = Variant::findOne($this->getSourceId());
+        $variant = Variant::findOne($source);
         return [
             'variant' => $variant
         ];
@@ -51,7 +51,7 @@ class EcommerceProduct extends MultiTypePropertyMapper implements PreviewablePro
         return Variant::find()->orderBy('RAND()')->typeId($productType)->one()->id ?? null;
     }
 
-    public static function getSourceTypes(): array
+    public static function defineSourceTypes(): array
     {
         $productTypes = Plugin::getInstance()->productTypes->allProductTypes;
         return array_map(function (ProductType $productType) {
@@ -75,5 +75,11 @@ class EcommerceProduct extends MultiTypePropertyMapper implements PreviewablePro
         $mappings[] = new HubSpotObjectMapping(['property' => 'name', 'template' => '{variant.title}']);
         $mappings[] = new HubSpotObjectMapping(['property' => 'hs_sku', 'template' => '{variant.sku}']);
         return $mappings;
+    }
+
+    public function getExternalObjectId($source)
+    {
+        $variant = Variant::findOne($source);
+        return $variant->uid;
     }
 }

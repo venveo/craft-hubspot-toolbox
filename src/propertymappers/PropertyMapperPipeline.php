@@ -4,17 +4,28 @@ namespace venveo\hubspottoolbox\propertymappers;
 use craft\base\Component;
 use craft\base\Element;
 use craft\helpers\ArrayHelper;
+use venveo\hubspottoolbox\entities\ecommerce\ExternalSyncMessage;
 
 class PropertyMapperPipeline extends Component {
     /**
      * @var PropertyMapper[]
      */
-    public $propertyMappers = [];
+    private $propertyMappers = [];
 
-    public function processInput($input) {
+    public function produceExternalSyncMessage($input): ExternalSyncMessage {
         $properties = [];
+        $externalIdentifier = null;
         foreach($this->propertyMappers as $propertyMapper) {
             $propertyMapper->setSourceId($input->id);
+
+            if (!$propertyMapper->canBeAppliedToSource()) {
+                continue;
+            }
+
+            if (!$externalIdentifier) {
+                $externalIdentifier = $propertyMapper->getExternalObjectId();
+            }
+
             foreach($propertyMapper->getPropertyMappings() as $mapping) {
                 if (!isset($properties[$mapping->property])) {
                     $propertyMapper->renderProperty($mapping);
@@ -22,15 +33,7 @@ class PropertyMapperPipeline extends Component {
                 }
             }
         }
-//        $result = [];
-//        foreach($properties as $property => $value) {
-//            $item = [];
-//            $item['name'] = $property;
-//            $item['value'] = $value;
-//            $result[] = $item;
-//        }
-//        return $result;
-        return $properties;
+        return new ExternalSyncMessage(['properties' => $properties, 'externalObjectId' => $externalIdentifier]);
     }
 
     /**
@@ -42,7 +45,7 @@ class PropertyMapperPipeline extends Component {
     }
 
     /**
-     * @param array $propertyMappers
+     * @param PropertyMapperInterface[] $propertyMappers
      */
     public function setPropertyMappers(array $propertyMappers): void
     {

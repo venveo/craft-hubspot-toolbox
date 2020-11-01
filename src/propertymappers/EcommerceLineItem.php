@@ -31,9 +31,9 @@ class EcommerceLineItem extends PropertyMapper implements PreviewablePropertyMap
         return 'ecomm.order.lineitem';
     }
 
-    public function getTemplateParams(): array
+    public function getTemplateParams($source): array
     {
-        $lineitem = Plugin::getInstance()->getLineItems()->getLineItemById($this->getSourceId());
+        $lineitem = Plugin::getInstance()->getLineItems()->getLineItemById($source);
         return [
             'lineitem' => $lineitem
         ];
@@ -55,5 +55,12 @@ class EcommerceLineItem extends PropertyMapper implements PreviewablePropertyMap
         $mappings[] = new HubSpotObjectMapping(['property' => 'discount', 'template' => '{lineitem.discount}']);
         $mappings[] = new HubSpotObjectMapping(['property' => 'tax', 'template' => '{lineitem.tax}']);
         return $mappings;
+    }
+
+
+    public function getExternalObjectId($source)
+    {
+        $lineitem = Plugin::getInstance()->getLineItems()->getLineItemById($source);
+        return $lineitem->id;
     }
 }

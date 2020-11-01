@@ -44,4 +44,14 @@ export default {
             }
         })
     },
+
+    deleteMapping(mappingId) {
+        return axios.post(Craft.getActionUrl('hubspot-toolbox/object-property-mapping/delete-mapping'), {
+            id: mappingId,
+        }, {
+            headers: {
+                'X-CSRF-Token': Craft.csrfTokenValue,
+            }
+        })
+    }
 }

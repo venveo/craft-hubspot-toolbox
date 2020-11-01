@@ -50,7 +50,7 @@
       <mapped-property v-for="(mapping, name) in propertyMappings"
                        v-model:template="propertyMappings[name].template"
                        :property="properties[name]"
-                       :preview="propertyMappings[name].renderedValue"
+                       :preview="previewData[name]"
                        v-on:input="(e) => {handleTemplateChange(propertyMappings[name])}"
                        v-on:delete="deletePropertyMapping(propertyMappings[name])"
       />
@@ -73,8 +73,10 @@ export default {
   data() {
     return {
       showingPropertyPicker: false,
+
       propertyMappings: [],
       properties: [],
+      previewData: {},
 
       selectedPropertyToAdd: '',
       previewObjectId: null,
@@ -100,8 +102,9 @@ export default {
         this.sourceTypes = data.sourceTypes
         this.sourceTypeName = data.sourceTypeName
       }
-      if (!this.previewObjectId) {
-        this.previewObjectId = data.sourceId
+      if (Object.keys(data).includes('previewData')) {
+        this.previewObjectId = data.previewData.previewObjectId
+        this.previewData = data.previewData.preview
       }
     },
     handleSourceTypeChanged: async function() {
@@ -135,11 +138,14 @@ export default {
     handleTemplateChange: debounce(function(mapping) {
       api.saveObjectMapping(mapping, this.mapper, this.sourceTypeId, this.previewObjectId).then(v => {
         const mappingData = v.data
-        mapping.renderedValue = mappingData.renderedValue
+        if (Object.keys(mappingData).includes('previewData')) {
+          this.previewData[mapping.property] = mappingData.previewData.preview
+        }
       });
     }, 250),
     async deletePropertyMapping(mapping) {
-      console.log('Need to delete', mapping)
+      await api.deleteMapping(mapping.id);
+      await this.fetchMappings();
     },
     async updatePreview() {
       this.loadingNewPreview = true

@@ -16,6 +16,7 @@ use yii\base\Arrayable;
  *
  * @property string $type
  * @property-read array $templateParams
+ * @property-read HubSpotObjectMapping[] $recommendedMappings
  */
 interface PropertyMapperInterface extends \ArrayAccess, Arrayable, \IteratorAggregate
 {
@@ -32,20 +33,6 @@ interface PropertyMapperInterface extends \ArrayAccess, Arrayable, \IteratorAggr
      * @param string $type
      */
     public function setType(string $type);
-
-    /**
-     * Sets the source object ID that is being mapped by this mapper
-     *
-     * @param $id
-     */
-    public function setSourceId($id);
-
-    /**
-     * Gets the source object ID that is being mapped by this mapper
-     *
-     * @return mixed
-     */
-    public function getSourceId();
 
     /**
      * What is the object name we're going to query from HubSpot for this mapper
@@ -99,21 +86,26 @@ interface PropertyMapperInterface extends \ArrayAccess, Arrayable, \IteratorAggr
     /**
      * Provides an array of params to be passed into object templates
      *
+     * @param $source
      * @return array
      */
-    public function getTemplateParams(): array;
+    public function getTemplateParams($source): array;
 
     /**
      * Sets the `renderedValue` on the supplied mapping
      *
      * @param HubSpotObjectMapping $mapping
+     * @param $source
+     * @return string
      */
-    public function renderProperty(HubSpotObjectMapping $mapping);
+    public function renderProperty(HubSpotObjectMapping $mapping, $source): string;
 
     /**
      * Renders all property mappings via the renderProperty() method
+     * @param $source
+     * @return array
      */
-    public function renderTemplates();
+    public function renderTemplates($source): array;
 
     /**
      * Returns a list of recommended object mappings for this mapper
@@ -121,4 +113,20 @@ interface PropertyMapperInterface extends \ArrayAccess, Arrayable, \IteratorAggr
      * @return HubSpotObjectMapping[]
      */
     public function getRecommendedMappings(): array;
+
+    /**
+     * Produces a unique identifier for a given source
+     *
+     * @param $source
+     * @return mixed
+     */
+    public function getExternalObjectId($source);
+
+    /**
+     * Returns whether the mapper can be applied to a source input
+     *
+     * @param $source
+     * @return bool
+     */
+    public function canBeAppliedToSource($source): bool;
 }

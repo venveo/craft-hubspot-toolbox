@@ -3,7 +3,7 @@
 namespace venveo\hubspottoolbox\propertymappers;
 
 use craft\commerce\elements\Order;
-use craft\commerce\Plugin;
+use craft\commerce\Plugin as Commerce;
 use venveo\hubspottoolbox\enums\HubSpotObjectType;
 use venveo\hubspottoolbox\models\HubSpotObjectMapping;
 use venveo\hubspottoolbox\traits\PreviewableMapperTrait;
@@ -28,9 +28,9 @@ class EcommerceDeal extends MultiTypePropertyMapper implements PreviewableProper
     }
 
 
-    public function getTemplateParams(): array
+    public function getTemplateParams($source): array
     {
-        $order = Order::findOne($this->getSourceId());
+        $order = Order::findOne($source);
         return [
             'order' => $order
         ];
@@ -41,15 +41,26 @@ class EcommerceDeal extends MultiTypePropertyMapper implements PreviewableProper
         return Order::find()->orderBy('RAND()')->one()->id;
     }
 
-    public static function getSourceTypes(): array
+    public static function defineSourceTypes(): array
     {
-        $statuses = Plugin::getInstance()->orderStatuses->allOrderStatuses;
+        $statuses = Commerce::getInstance()->orderStatuses->allOrderStatuses;
         $sourceTypes = array_map(function ($status) {
             return new MapperSourceType([
                 'displayName' => $status->name,
-                'id' => $status->id
+                'id' => 'status:' . $status->id
             ]);
         }, $statuses);
+
+        $sourceTypes[] = new MapperSourceType([
+            'displayName' => 'Checkout Pending',
+            'id' => 'checkout-pending'
+        ]);
+
+        $sourceTypes[] = new MapperSourceType([
+            'displayName' => 'Checkout Abandoned',
+            'id' => 'checkout-abandoned'
+        ]);
+
         return $sourceTypes;
     }
 
@@ -64,5 +75,40 @@ class EcommerceDeal extends MultiTypePropertyMapper implements PreviewableProper
         $mappings[] = new HubSpotObjectMapping(['property' => 'dealname', 'template' => '{order.reference}']);
         $mappings[] = new HubSpotObjectMapping(['property' => 'amount', 'template' => '{order.total}']);
         return $mappings;
+    }
+
+    public function canBeAppliedToSource($source): bool
+    {
+        if ($this->sourceTypeId === null) {
+            return true;
+        }
+
+        $order = Order::findOne($source);
+
+        $edge = Commerce::getInstance()->getCarts()->getActiveCartEdgeDuration();
+        $updatedAfter = [];
+        $updatedAfter[] = '>= ' . $edge;
+
+        $criteriaActive = ['dateUpdated' => $updatedAfter, 'isCompleted' => 'not 1'];
+        $updatedBefore = [];
+        $updatedBefore[] = '< ' . $edge;
+        $criteriaInactive = ['dateUpdated' => $updatedBefore, 'isCompleted' => 'not 1'];
+
+        if ($this->sourceTypeId === 'checkout_pending' && !$order->isCompleted) {
+            return true;
+        }
+        if (strpos($this->sourceTypeId, 'status:') === 0) {
+            $status = (int)substr($this->sourceTypeId, 7);
+            if ($status === (int)$order->orderStatusId) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function getExternalObjectId($source)
+    {
+        return Order::findOne($source)->uid;
     }
 }

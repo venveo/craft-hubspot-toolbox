@@ -85,6 +85,18 @@ class PropertiesService extends Component
         return true;
     }
 
+    public function getMappingById($id) {
+        $mapping = $this->_createMappingQuery()->where(['id' => $id])->one();
+        if (!$mapping) {
+            return null;
+        }
+        return $this->_createPropertyMappingFromRecord($mapping);
+    }
+
+    public function deleteMapping(HubSpotObjectMapping $mapping) {
+        return HubSpotObjectMappingRecord::findOne($mapping->id)->delete();
+    }
+
     public function publishMappings(PropertyMapperInterface $mapper)
     {
         $record = HubSpotObjectMapperRecord::findOne($mapper->id);
@@ -171,6 +183,20 @@ class PropertiesService extends Component
         }
         $mapper = $this->_createPropertyMapperFromRecord($mapperRecord, $setProperties);
         return $mapper;
+    }
+
+    protected function _createPropertyMappingFromRecord(HubSpotObjectMappingRecord $propertyMappingRecord): HubSpotObjectMapping
+    {
+        $propertyMapping = new HubSpotObjectMapping();
+        $propertyMapping->property = $propertyMappingRecord->property;
+        $propertyMapping->uid = $propertyMappingRecord->uid;
+        $propertyMapping->id = $propertyMappingRecord->id;
+        $propertyMapping->template = $propertyMappingRecord->template;
+        $propertyMapping->dateCreated = $propertyMappingRecord->dateCreated;
+        $propertyMapping->datePublished = $propertyMappingRecord->datePublished;
+        $propertyMapping->dateUpdated = $propertyMappingRecord->dateUpdated;
+
+        return $propertyMapping;
     }
 
     protected function _createPropertyMapper($config): PropertyMapperInterface

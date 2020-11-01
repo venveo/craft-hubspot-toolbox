@@ -3,6 +3,8 @@
 namespace venveo\hubspottoolbox\propertymappers;
 
 use craft\commerce\elements\Order;
+use craft\commerce\models\Customer;
+use craft\commerce\Plugin;
 use venveo\hubspottoolbox\enums\HubSpotObjectType;
 use venveo\hubspottoolbox\models\HubSpotObjectMapping;
 use venveo\hubspottoolbox\traits\PreviewableMapperTrait;
@@ -23,33 +25,48 @@ class EcommerceContact extends PropertyMapper implements PreviewablePropertyMapp
 
     public static function getObjectContext(): string
     {
-        return 'ecomm.order';
+        return 'ecomm.customer';
     }
 
-    public function getTemplateParams(): array
+    public function getTemplateParams($source): array
     {
-        $order = Order::findOne($this->getSourceId());
+        /** @var Customer $customer */
+        $customer = Plugin::getInstance()->customers->getCustomerById($source);
+        $order = Order::find()->customerId($customer->id)->email('NOT :empty:')->one();
         return [
-            'order' => $order
+            'customer' => $customer,
+            'customerOrder' => $order
         ];
     }
 
     public function producePreviewObjectId()
     {
-        return Order::find()->orderBy('RAND()')->isCompleted(true)->limit(1)->ids()[0] ?? null;
+        /** @var Order $order */
+        $order = Order::find()->orderBy('RAND()')->isCompleted(true)->one();
+        if (!$order) {
+            return null;
+        }
+        return $order->customer->id;
     }
 
     public function getRecommendedMappings(): array
     {
         $mappings = [];
-        $mappings[] = new HubSpotObjectMapping(['property' => 'firstname', 'template' => '{order.billingAddress.firstName}']);
-        $mappings[] = new HubSpotObjectMapping(['property' => 'lastname', 'template' => '{order.billingAddress.firstName}']);
-        $mappings[] = new HubSpotObjectMapping(['property' => 'email', 'template' => '{order.email}']);
-        $mappings[] = new HubSpotObjectMapping(['property' => 'phone', 'template' => '{order.shippingAddress.phone|default(order.billingAddress.phone)}']);
-        $mappings[] = new HubSpotObjectMapping(['property' => 'city', 'template' => '{order.shippingAddress.city}']);
-        $mappings[] = new HubSpotObjectMapping(['property' => 'state', 'template' => '{order.shippingAddress.state}']);
-        $mappings[] = new HubSpotObjectMapping(['property' => 'zip', 'template' => '{order.shippingAddress.zipCode}']);
-        $mappings[] = new HubSpotObjectMapping(['property' => 'country', 'template' => '{order.shippingAddress.country}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'firstname', 'template' => '{customer.billingAddress.firstName}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'lastname', 'template' => '{customer.billingAddress.firstName}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'email', 'template' => '{customerOrder.email}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'phone', 'template' => '{customer.primaryShippingAddress.phone|default(customer.primaryBillingAddress.phone)}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'city', 'template' => '{customer.primaryShippingAddress.city}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'state', 'template' => '{customer.primaryShippingAddress.state}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'zip', 'template' => '{customer.primaryShippingAddress.zipCode}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'country', 'template' => '{customer.primaryShippingAddress.country}']);
         return $mappings;
+    }
+
+    public function getExternalObjectId($source)
+    {
+        $customer = Plugin::getInstance()->customers->getCustomerById($source);
+        $order = Order::find()->customerId($customer->id)->email('NOT :empty:')->one();
+        return $order->email ?? $customer->id;
     }
 }
