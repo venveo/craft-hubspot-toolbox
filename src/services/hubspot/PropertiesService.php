@@ -35,11 +35,18 @@ class PropertiesService extends Component
      * Gets all properties for a type of object from HubSpot
      *
      * @param $objectType
+     * @param string[] $specificProperties
+     * @param bool $excludeHidden
      * @return ObjectProperty[]
      */
-    public function getObjectProperties($objectType): array
+    public function getObjectProperties($objectType, $specificProperties = []): array
     {
         $data = $this->getHubSpot()->objectProperties($objectType)->all()->getData();
+        if (count($specificProperties)) {
+            $data = array_filter($data, function ($item) use ($specificProperties) {
+                return in_array($item->name, $specificProperties, true);
+            });
+        }
         $properties = array_map(function ($item) {
             return new ObjectProperty($item);
         }, $data);
@@ -104,6 +111,7 @@ class PropertiesService extends Component
             $transaction->rollBack();
             throw $e;
         }
+        HubSpotToolbox::$plugin->ecommSettings->saveMappingSettings();
     }
 
     public function _createPropertyMapperFromRecord(HubSpotObjectMapperRecord $mapperRecord, $setProperties = false)
