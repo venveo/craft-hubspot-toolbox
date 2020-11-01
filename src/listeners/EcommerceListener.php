@@ -26,7 +26,7 @@ class EcommerceListener
         $purchasable = $e->sender;
         $syncMessage = new ExternalSyncMessage([
             'action' => ExternalSyncMessage::ACTION_UPSERT,
-            'changedAt' => HubSpotTimeHelper::getChangedAtTimeStamp(),
+            'changedAt' => HubSpotTimeHelper::prepareDateTimeForHubSpot(),
             'externalObjectId' => $purchasable->id,
             'properties' => [
                 'product_name' => $purchasable->title,
@@ -57,7 +57,7 @@ class EcommerceListener
         $order = $e->sender;
         $syncMessage = new ExternalSyncMessage([
             'action' => ExternalSyncMessage::ACTION_UPSERT,
-            'changedAt' => HubSpotTimeHelper::getChangedAtTimeStamp(),
+            'changedAt' => HubSpotTimeHelper::prepareDateTimeForHubSpot(),
             'externalObjectId' => $order->email,
             'properties' => [
                 'firstname' => $order->shippingAddress->firstName,
@@ -72,7 +72,7 @@ class EcommerceListener
 
         $deal = new ExternalSyncMessage([
             'action' => ExternalSyncMessage::ACTION_UPSERT,
-            'changedAt' => HubSpotTimeHelper::getChangedAtTimeStamp(),
+            'changedAt' => HubSpotTimeHelper::prepareDateTimeForHubSpot(),
             'externalObjectId' => $order->id,
             'properties' => [
                 'order_id' => $order->number,
