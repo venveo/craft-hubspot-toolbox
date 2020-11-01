@@ -36,7 +36,6 @@ class PropertiesService extends Component
      *
      * @param $objectType
      * @param string[] $specificProperties
-     * @param bool $excludeHidden
      * @return ObjectProperty[]
      */
     public function getObjectProperties($objectType, $specificProperties = []): array
@@ -58,12 +57,17 @@ class PropertiesService extends Component
      * @param null $sourceTypeId
      * @return PropertyMapperInterface
      */
-    public function getMapper($type, $sourceTypeId = null)
+    public function getMapper($type, $sourceTypeId = null): PropertyMapperInterface
     {
         return $this->getOrCreateObjectMapper($type, $sourceTypeId, true);
     }
 
-    public function saveMapping(HubSpotObjectMapping $mapping)
+    /**
+     * @param HubSpotObjectMapping $mapping
+     * @return bool
+     * @throws \Exception
+     */
+    public function saveMapping(HubSpotObjectMapping $mapping): bool
     {
         if ($mapping->id) {
             $record = $this->_createMappingQuery()->where(['=', 'id', $mapping->id])->one();
@@ -85,6 +89,10 @@ class PropertiesService extends Component
         return true;
     }
 
+    /**
+     * @param $id
+     * @return HubSpotObjectMapping|null
+     */
     public function getMappingById($id) {
         $mapping = $this->_createMappingQuery()->where(['id' => $id])->one();
         if (!$mapping) {
@@ -93,11 +101,23 @@ class PropertiesService extends Component
         return $this->_createPropertyMappingFromRecord($mapping);
     }
 
+    /**
+     * @param HubSpotObjectMapping $mapping
+     * @return false|int
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function deleteMapping(HubSpotObjectMapping $mapping) {
         return HubSpotObjectMappingRecord::findOne($mapping->id)->delete();
     }
 
-    public function publishMappings(PropertyMapperInterface $mapper)
+    /**
+     * @param PropertyMapperInterface $mapper
+     * @throws \Throwable
+     * @throws \yii\db\Exception
+     * @throws \yii\db\StaleObjectException
+     */
+    public function publishMappings(PropertyMapperInterface $mapper): void
     {
         $record = HubSpotObjectMapperRecord::findOne($mapper->id);
         $unpublishedMappings = $record->getUnpublishedMappings()->all();
@@ -126,7 +146,13 @@ class PropertiesService extends Component
         HubSpotToolbox::$plugin->ecommSettings->saveMappingSettings();
     }
 
-    public function _createPropertyMapperFromRecord(HubSpotObjectMapperRecord $mapperRecord, $setProperties = false)
+    /**
+     * @param HubSpotObjectMapperRecord $mapperRecord
+     * @param false $setProperties
+     * @return PropertyMapperInterface
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function _createPropertyMapperFromRecord(HubSpotObjectMapperRecord $mapperRecord, $setProperties = false): PropertyMapperInterface
     {
 
         $config = [
@@ -150,6 +176,10 @@ class PropertiesService extends Component
         return $mapper;
     }
 
+    /**
+     * @param $mapperType
+     * @return array|PropertyMapperInterface[]
+     */
     public function getPropertyMappersByType($mapperType)
     {
         /** @var HubSpotObjectMapperRecord $mapperRecord */
@@ -185,6 +215,10 @@ class PropertiesService extends Component
         return $mapper;
     }
 
+    /**
+     * @param HubSpotObjectMappingRecord $propertyMappingRecord
+     * @return HubSpotObjectMapping
+     */
     protected function _createPropertyMappingFromRecord(HubSpotObjectMappingRecord $propertyMappingRecord): HubSpotObjectMapping
     {
         $propertyMapping = new HubSpotObjectMapping();
@@ -199,6 +233,11 @@ class PropertiesService extends Component
         return $propertyMapping;
     }
 
+    /**
+     * @param $config
+     * @return PropertyMapperInterface
+     * @throws \yii\base\InvalidConfigException
+     */
     protected function _createPropertyMapper($config): PropertyMapperInterface
     {
         if (is_string($config)) {
@@ -218,8 +257,6 @@ class PropertiesService extends Component
     }
 
     /**
-     * @param $objectType
-     * @param null $context
      * @return ActiveQuery
      */
     protected function _createMappingQuery(): ActiveQuery
@@ -229,7 +266,7 @@ class PropertiesService extends Component
 
 
     /**
-     * @param $type
+     * @param $mapperType
      * @param null $sourceTypeId
      * @return ActiveQuery
      */
@@ -244,7 +281,6 @@ class PropertiesService extends Component
 
     public function createPropertyMapperPipeline($mapperType): PropertyMapperPipeline
     {
-
         $mappers = $this->getPropertyMappersByType($mapperType);
         /** @var PropertyMapperPipeline $pipeline */
         $pipeline = \Craft::createObject(PropertyMapperPipeline::class);
