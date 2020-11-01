@@ -13,7 +13,7 @@ abstract class HubSpotFeature extends SavableComponent implements HubSpotFeature
     public $enabled;
 
     public function getCpEditUrl() {
-        return UrlHelper::cpUrl('hubspot-toolbox/features/' . static::getHandle());
+        return UrlHelper::cpUrl('hubspot-toolbox/' . static::getHandle());
     }
 
     public function getRequiredScopes(): array

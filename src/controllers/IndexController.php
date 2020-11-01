@@ -3,10 +3,7 @@
 namespace venveo\hubspottoolbox\controllers;
 
 use craft\helpers\UrlHelper;
-use craft\web\Controller;
 
-/**
- */
 class IndexController extends BaseHubSpotController
 {
     public function actionIndex()

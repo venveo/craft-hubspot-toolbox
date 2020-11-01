@@ -20,6 +20,9 @@ trait HubSpotTokenAuthorization
 
         $settings = HubSpotToolbox::$plugin->getSettings();
         $token = HubSpotToolbox::$plugin->oauth->getToken(\Craft::parseEnv($settings->appId));
+        if (!$token) {
+            throw new \Exception('No valid HubSpot token exists');
+        }
         return self::$hs = Factory::createWithOAuth2Token($token->accessToken);
     }
 }

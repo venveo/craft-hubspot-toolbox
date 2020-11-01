@@ -3,19 +3,20 @@
 namespace venveo\hubspottoolbox\controllers;
 
 use craft\helpers\UrlHelper;
-use craft\web\Controller;
 use venveo\hubspottoolbox\entities\ecommerce\Store;
 use venveo\hubspottoolbox\HubSpotToolbox;
 
-class EcommerceController extends Controller
+class EcommerceController extends BaseHubSpotController
 {
     public function actionIndex()
     {
+        $this->requireValidHubSpotToken();
         return $this->redirect(UrlHelper::cpUrl('hubspot-toolbox/ecommerce/settings'));
     }
 
     public function actionSettings()
     {
+        $this->requireValidHubSpotToken();
         $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
         return $this->renderTemplate('hubspot-toolbox/_ecommerce/settings', [
             'feature' => $feature,
@@ -26,6 +27,7 @@ class EcommerceController extends Controller
     public function actionContactProperties()
     {
         $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
+        $this->requireValidSettingsForFeature($feature);
         return $this->renderTemplate('hubspot-toolbox/_ecommerce/contact-properties', [
             'feature' => $feature
         ]);
@@ -34,6 +36,7 @@ class EcommerceController extends Controller
     public function actionDealProperties()
     {
         $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
+        $this->requireValidSettingsForFeature($feature);
         return $this->renderTemplate('hubspot-toolbox/_ecommerce/deal-properties', [
             'feature' => $feature
         ]);
@@ -42,6 +45,7 @@ class EcommerceController extends Controller
     public function actionLineitemProperties()
     {
         $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
+        $this->requireValidSettingsForFeature($feature);
         return $this->renderTemplate('hubspot-toolbox/_ecommerce/lineitem-properties', [
             'feature' => $feature
         ]);
@@ -50,6 +54,7 @@ class EcommerceController extends Controller
     public function actionProductProperties()
     {
         $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
+        $this->requireValidSettingsForFeature($feature);
         return $this->renderTemplate('hubspot-toolbox/_ecommerce/product-properties', [
             'feature' => $feature
         ]);
