@@ -72,7 +72,7 @@ class EcommerceDeal extends MultiTypePropertyMapper implements PreviewableProper
     public function getRecommendedMappings(): array
     {
         $mappings = [];
-        $mappings[] = new HubSpotObjectMapping(['property' => 'dealname', 'template' => '{order.reference}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'dealname', 'template' => '{order.reference ?? order.number}']);
         $mappings[] = new HubSpotObjectMapping(['property' => 'amount', 'template' => '{order.total}']);
         return $mappings;
     }
@@ -86,17 +86,17 @@ class EcommerceDeal extends MultiTypePropertyMapper implements PreviewableProper
         $order = Order::findOne($source);
 
         $edge = Commerce::getInstance()->getCarts()->getActiveCartEdgeDuration();
-        $updatedAfter = [];
-        $updatedAfter[] = '>= ' . $edge;
+        $inactiveCutoff = new \DateTime($edge);
+        $cartIsActive = $order->dateUpdated >= $inactiveCutoff;
 
-        $criteriaActive = ['dateUpdated' => $updatedAfter, 'isCompleted' => 'not 1'];
-        $updatedBefore = [];
-        $updatedBefore[] = '< ' . $edge;
-        $criteriaInactive = ['dateUpdated' => $updatedBefore, 'isCompleted' => 'not 1'];
 
-        if ($this->sourceTypeId === 'checkout_pending' && !$order->isCompleted) {
+        if ($this->sourceTypeId === 'checkout-pending' && !$order->isCompleted && $cartIsActive) {
             return true;
         }
+        if ($this->sourceTypeId === 'checkout-abandoned' && !$order->isCompleted && !$cartIsActive) {
+            return true;
+        }
+
         if (strpos($this->sourceTypeId, 'status:') === 0) {
             $status = (int)substr($this->sourceTypeId, 7);
             if ($status === (int)$order->orderStatusId) {

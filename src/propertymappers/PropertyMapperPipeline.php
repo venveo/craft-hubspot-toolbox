@@ -16,20 +16,17 @@ class PropertyMapperPipeline extends Component {
         $properties = [];
         $externalIdentifier = null;
         foreach($this->propertyMappers as $propertyMapper) {
-            $propertyMapper->setSourceId($input->id);
-
-            if (!$propertyMapper->canBeAppliedToSource()) {
+            if (!$propertyMapper->canBeAppliedToSource($input)) {
                 continue;
             }
 
             if (!$externalIdentifier) {
-                $externalIdentifier = $propertyMapper->getExternalObjectId();
+                $externalIdentifier = $propertyMapper->getExternalObjectId($input);
             }
 
             foreach($propertyMapper->getPropertyMappings() as $mapping) {
                 if (!isset($properties[$mapping->property])) {
-                    $propertyMapper->renderProperty($mapping);
-                    $properties[$mapping->property] = $mapping->getRenderedValue();
+                    $properties[$mapping->property] = $propertyMapper->renderProperty($mapping, $input);
                 }
             }
         }
