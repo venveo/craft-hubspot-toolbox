@@ -13,7 +13,7 @@ use venveo\hubspottoolbox\propertymappers\PreviewablePropertyMapperInterface;
 use venveo\hubspottoolbox\propertymappers\PropertyMapperInterface;
 use yii\web\HttpException;
 
-class ObjectPropertyMappingController extends Controller
+class PropertyMappersController extends Controller
 {
     private static $requestMapper = null;
 

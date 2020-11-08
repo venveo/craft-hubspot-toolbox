@@ -18,11 +18,11 @@ export default {
     },
 
     getObjectMappings(mapper, sourceTypeId, previewObjectId) {
-        return axios.get(Craft.getActionUrl('hubspot-toolbox/object-property-mapping/get-object-mappings', {mapper, sourceTypeId, previewObjectId}))
+        return axios.get(Craft.getActionUrl('hubspot-toolbox/property-mappers/get-object-mappings', {mapper, sourceTypeId, previewObjectId}))
     },
 
     saveObjectMapping(mapping, mapper, sourceTypeId, property, previewObjectId = null) {
-        return axios.post(Craft.getActionUrl('hubspot-toolbox/object-property-mapping/save-object-mapping'), {
+        return axios.post(Craft.getActionUrl('hubspot-toolbox/property-mappers/save-object-mapping'), {
             mapping,
             mapper,
             property,
@@ -36,7 +36,7 @@ export default {
     },
 
     publishObjectMappings(mapper, sourceTypeId) {
-        return axios.post(Craft.getActionUrl('hubspot-toolbox/object-property-mapping/publish-object-mapping'), {
+        return axios.post(Craft.getActionUrl('hubspot-toolbox/property-mappers/publish-object-mapping'), {
             mapper,
             sourceTypeId
         }, {
@@ -47,7 +47,7 @@ export default {
     },
 
     deleteMapping(mappingId) {
-        return axios.post(Craft.getActionUrl('hubspot-toolbox/object-property-mapping/delete-mapping'), {
+        return axios.post(Craft.getActionUrl('hubspot-toolbox/property-mappers/delete-mapping'), {
             id: mappingId,
         }, {
             headers: {
