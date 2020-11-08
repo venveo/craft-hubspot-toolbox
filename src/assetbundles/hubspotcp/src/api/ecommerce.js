@@ -17,12 +17,12 @@ export default {
             });
     },
 
-    getObjectMappings(mapper, sourceTypeId, previewObjectId) {
-        return axios.get(Craft.getActionUrl('hubspot-toolbox/property-mappers/get-object-mappings', {mapper, sourceTypeId, previewObjectId}))
+    getMappings(mapper, sourceTypeId, previewObjectId) {
+        return axios.get(Craft.getActionUrl('hubspot-toolbox/property-mappers/get-mappings', {mapper, sourceTypeId, previewObjectId}))
     },
 
-    saveObjectMapping(mapping, mapper, sourceTypeId, property, previewObjectId = null) {
-        return axios.post(Craft.getActionUrl('hubspot-toolbox/property-mappers/save-object-mapping'), {
+    saveMapping(mapping, mapper, sourceTypeId, property, previewObjectId = null) {
+        return axios.post(Craft.getActionUrl('hubspot-toolbox/property-mappers/save-mapping'), {
             mapping,
             mapper,
             property,
@@ -36,7 +36,7 @@ export default {
     },
 
     publishObjectMappings(mapper, sourceTypeId) {
-        return axios.post(Craft.getActionUrl('hubspot-toolbox/property-mappers/publish-object-mapping'), {
+        return axios.post(Craft.getActionUrl('hubspot-toolbox/property-mappers/publish'), {
             mapper,
             sourceTypeId
         }, {

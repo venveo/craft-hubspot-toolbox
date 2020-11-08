@@ -103,7 +103,7 @@ export default {
   },
   methods: {
     async fetchMappings() {
-      const {data} = await api.getObjectMappings(this.mapper, this.sourceTypeId, this.previewObjectId)
+      const {data} = await api.getMappings(this.mapper, this.sourceTypeId, this.previewObjectId)
       this.propertiesFromApi = omitBy(data.propertiesFromApi, prop => prop.readOnlyValue)
       this.propertyMappings = data.propertyMappings
       if (Object.keys(data).includes('sourceTypes')) {
@@ -128,7 +128,7 @@ export default {
         name: this.propertiesFromApi[this.selectedPropertyToAdd].name,
         dataType: this.propertiesFromApi[this.selectedPropertyToAdd].type,
       }
-      await api.saveObjectMapping(mapping, this.mapper, this.sourceTypeId, property, this.previewObjectId);
+      await api.saveMapping(mapping, this.mapper, this.sourceTypeId, property, this.previewObjectId);
       await this.fetchMappings();
       this.loadingAddProperty = false
       this.selectedPropertyToAdd = '';
@@ -139,7 +139,7 @@ export default {
       alert('Published');
     },
     handleTemplateChange: debounce(function(mapping) {
-      api.saveObjectMapping(mapping, this.mapper, this.sourceTypeId, null, this.previewObjectId).then(v => {
+      api.saveMapping(mapping, this.mapper, this.sourceTypeId, null, this.previewObjectId).then(v => {
         const mappingData = v.data
         if (Object.keys(mappingData).includes('previewData')) {
           this.previewData[mapping.property.name] = mappingData.previewData.preview

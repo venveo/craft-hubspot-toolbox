@@ -17,7 +17,7 @@ class PropertyMappersController extends Controller
 {
     private static $requestMapper = null;
 
-    public function actionGetObjectMappings()
+    public function actionGetMappings()
     {
         $mapper = $this->getMapperFromRequest();
         $attributes = ['propertiesFromApi', 'propertyMappings.property'];
@@ -32,7 +32,7 @@ class PropertyMappersController extends Controller
         return $this->asJson($data);
     }
 
-    public function actionSaveObjectMapping()
+    public function actionSaveMapping()
     {
         $this->requireAcceptsJson();
         $this->requirePostRequest();
@@ -66,7 +66,7 @@ class PropertyMappersController extends Controller
         return $this->asJson($mappingData);
     }
 
-    public function actionPublishObjectMapping()
+    public function actionPublish()
     {
         $this->requireAcceptsJson();
         $this->requirePostRequest();
