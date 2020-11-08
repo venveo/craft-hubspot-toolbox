@@ -51,7 +51,7 @@
                        v-model:template="propertyMappings[index].template"
                        :property="propertiesFromApi[mapping.property.name]"
                        :preview="previewData[mapping.property.name]"
-                       v-on:input="(e) => {handleTemplateChange(propertyMappings[index])}"
+                       v-on:input="(e) => {handleTemplateChange(propertyMappings[index], index)}"
                        v-on:delete="deletePropertyMapping(propertyMappings[index])"
       />
       </tbody>
@@ -138,11 +138,12 @@ export default {
       await this.fetchMappings();
       alert('Published');
     },
-    handleTemplateChange: debounce(function(mapping) {
+    handleTemplateChange: debounce(function(mapping, index) {
       api.saveMapping(mapping, this.mapper, this.sourceTypeId, null, this.previewObjectId).then(v => {
         const mappingData = v.data
         if (Object.keys(mappingData).includes('previewData')) {
           this.previewData[mapping.property.name] = mappingData.previewData.preview
+          this.propertyMappings[index].id = mappingData.id
         }
       });
     }, 250),

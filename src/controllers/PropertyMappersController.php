@@ -47,9 +47,16 @@ class PropertyMappersController extends Controller
             $property = HubSpotToolbox::$plugin->properties->getPropertyById($mapper::getHubSpotObjectType(),
                 $data['propertyId']);
         }
+        $mappingId = null;
+        if (isset($data['id'])) {
+            $existingMapping = HubSpotToolbox::$plugin->propertyMappings->getMappingById($data['id']);
+            if ($existingMapping->datePublished === null) {
+                $mappingId = $existingMapping->id;
+            }
+        }
 
         $mapping = new HubSpotObjectMapping([
-            'id' => $data['id'] ?? null,
+            'id' => $mappingId,
             'template' => $data['template'] ?? '',
             'propertyId' => $property->id,
             'mapperId' => $mapper->id,

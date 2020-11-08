@@ -15,6 +15,7 @@ use craft\base\Component;
 use craft\base\MemoizableArray;
 use craft\db\Query;
 use craft\errors\MissingComponentException;
+use craft\helpers\ArrayHelper;
 use craft\helpers\Component as ComponentHelper;
 use craft\helpers\DateTimeHelper;
 use venveo\hubspottoolbox\HubSpotToolbox;
@@ -124,7 +125,8 @@ class PropertyMappingsService extends Component
     {
         $mappingsForMapper = $this->_allMappings()->where('mapperId', $mapper->id);
         $unpublishedMappings = $mappingsForMapper->where('datePublished', null)->all();
-        $publishedMappings = $mappingsForMapper->where('datePublished')->all();
+        $unpublishedMappingPropertyIds = ArrayHelper::getColumn($unpublishedMappings, 'propertyId');
+        $publishedMappings = $mappingsForMapper->where('datePublished')->whereIn('propertyId', $unpublishedMappingPropertyIds)->all();
 
         if (count($unpublishedMappings)) {
             $transaction = Craft::$app->getDb()->beginTransaction();
@@ -149,7 +151,7 @@ class PropertyMappingsService extends Component
 
     /**
      * @param $mapperType
-     * @return array|PropertyMapperInterface[]
+     * @return PropertyMapperInterface[]
      * @throws \yii\base\InvalidConfigException
      */
     public function getPropertyMappersByType($mapperType): array

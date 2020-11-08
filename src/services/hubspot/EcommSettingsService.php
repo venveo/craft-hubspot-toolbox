@@ -17,6 +17,7 @@ use venveo\hubspottoolbox\entities\ecommerce\ExternalSyncSettings;
 use venveo\hubspottoolbox\entities\ecommerce\Settings as EcommerceBridgeSettings;
 use venveo\hubspottoolbox\enums\HubSpotObjectType;
 use venveo\hubspottoolbox\HubSpotToolbox;
+use venveo\hubspottoolbox\models\HubSpotObjectProperty;
 use venveo\hubspottoolbox\propertymappers\EcommerceContact;
 use venveo\hubspottoolbox\propertymappers\EcommerceDeal;
 use venveo\hubspottoolbox\propertymappers\EcommerceLineItem;
@@ -26,6 +27,29 @@ use venveo\hubspottoolbox\traits\HubSpotApiKeyAuthorization;
 class EcommSettingsService extends Component
 {
     use HubSpotApiKeyAuthorization;
+
+    public function getMappingTypeFromProperty(HubSpotObjectProperty $property): string
+    {
+        $type = $property->dataType;
+        switch($type) {
+            case 'number':
+                return ExternalPropertyMapping::DATA_TYPE_NUMBER;
+            case 'datetime':
+                return ExternalPropertyMapping::DATA_TYPE_DATETIME;
+            default:
+                return ExternalPropertyMapping::DATA_TYPE_STRING;
+        }
+    }
+
+    /**
+     * @param HubSpotObjectProperty $property
+     * @return ExternalPropertyMapping
+     */
+    protected function constructExternalPropertyMapping(HubSpotObjectProperty $property): ExternalPropertyMapping
+    {
+        return new ExternalPropertyMapping($property->name, $property->name,
+            $this->getMappingTypeFromProperty($property));
+    }
 
     public function getMappingSettings()
     {
@@ -39,14 +63,14 @@ class EcommSettingsService extends Component
 
     protected function getContactProperties(): ExternalSyncSettings
     {
+        $properties = HubSpotToolbox::$plugin->properties->getAllPropertiesForMapperType(EcommerceContact::class);
         $props = [];
-        $propertyNames = HubSpotToolbox::$plugin->properties->getAllUniqueMappedPropertyNames(EcommerceContact::class);
-        $properties = HubSpotToolbox::$plugin->properties->getObjectProperties(EcommerceContact::getHubSpotObjectType(),
-            $propertyNames);
         foreach ($properties as $property) {
-            $props[] = new ExternalPropertyMapping($property->name, $property->name,
-                ExternalPropertyMapping::DATA_TYPE_STRING);
+            $props[] = $this->constructExternalPropertyMapping($property);
         }
+        return new ExternalSyncSettings([
+            'properties' => $props
+        ]);
 
         /*
                 $props[] = new ExternalPropertyMapping('email', 'email',
@@ -72,13 +96,19 @@ class EcommSettingsService extends Component
                 $props[] = new ExternalPropertyMapping('billing_postcode', 'billing_postcode',
                     ExternalPropertyMapping::DATA_TYPE_STRING);
         */
-        return new ExternalSyncSettings([
-            'properties' => $props
-        ]);
+
     }
 
     protected function getProductProperties(): ExternalSyncSettings
     {
+        $properties = HubSpotToolbox::$plugin->properties->getAllPropertiesForMapperType(EcommerceProduct::class);
+        $props = [];
+        foreach ($properties as $property) {
+            $props[] = $this->constructExternalPropertyMapping($property);
+        }
+        return new ExternalSyncSettings([
+            'properties' => $props
+        ]);
 //        $props = [];
 //        $props[] = new ExternalPropertyMapping('name', 'name',
 //            ExternalPropertyMapping::DATA_TYPE_STRING);
@@ -90,29 +120,20 @@ class EcommSettingsService extends Component
 //            ExternalPropertyMapping::DATA_TYPE_NUMBER);
 //        $props[] = new ExternalPropertyMapping('description', 'description',
 //            ExternalPropertyMapping::DATA_TYPE_STRING);
-        $propertyNames = HubSpotToolbox::$plugin->properties->getAllUniqueMappedPropertyNames(EcommerceProduct::class);
-        $properties = HubSpotToolbox::$plugin->properties->getObjectProperties(EcommerceProduct::getHubSpotObjectType(),
-            $propertyNames);
-        foreach ($properties as $property) {
-            $props[] = new ExternalPropertyMapping($property->name, $property->name,
-                ExternalPropertyMapping::DATA_TYPE_STRING);
-        }
-        return new ExternalSyncSettings([
-            'properties' => $props
-        ]);
     }
 
     protected function getDealProperties(): ExternalSyncSettings
     {
-        $propertyNames = HubSpotToolbox::$plugin->properties->getAllUniqueMappedPropertyNames(EcommerceDeal::class);
-        $properties = HubSpotToolbox::$plugin->properties->getObjectProperties(EcommerceDeal::getHubSpotObjectType(),
-            $propertyNames);
+        $properties = HubSpotToolbox::$plugin->properties->getAllPropertiesForMapperType(EcommerceDeal::class);
+        $props = [];
         foreach ($properties as $property) {
-            $props[] = new ExternalPropertyMapping($property->name, $property->name,
-                ExternalPropertyMapping::DATA_TYPE_STRING);
+            $props[] = $this->constructExternalPropertyMapping($property);
         }
-        $props[] = new ExternalPropertyMapping('dealstage', 'dealstage',
-            ExternalPropertyMapping::DATA_TYPE_STRING);
+        return new ExternalSyncSettings([
+            'properties' => $props
+        ]);
+//        $props[] = new ExternalPropertyMapping('dealstage', 'dealstage',
+//            ExternalPropertyMapping::DATA_TYPE_STRING);
 //        $props[] = new ExternalPropertyMapping('dealname', 'dealname',
 //            ExternalPropertyMapping::DATA_TYPE_STRING);
 //        $props[] = new ExternalPropertyMapping('closedate', 'closedate',
@@ -133,22 +154,19 @@ class EcommSettingsService extends Component
 //            ExternalPropertyMapping::DATA_TYPE_NUMBER);
 //        $props[] = new ExternalPropertyMapping('description', 'description',
 //            ExternalPropertyMapping::DATA_TYPE_STRING);
-
-        return new ExternalSyncSettings([
-            'properties' => $props
-        ]);
     }
 
     protected function getLineItemProperties(): ExternalSyncSettings
     {
-        $propertyNames = HubSpotToolbox::$plugin->properties->getAllUniqueMappedPropertyNames(EcommerceLineItem::class);
-        $properties = HubSpotToolbox::$plugin->properties->getObjectProperties(EcommerceLineItem::getHubSpotObjectType(),
-            $propertyNames);
-        foreach ($properties as $property) {
-            $props[] = new ExternalPropertyMapping($property->name, $property->name,
-                ExternalPropertyMapping::DATA_TYPE_STRING);
-        }
+        $properties = HubSpotToolbox::$plugin->properties->getAllPropertiesForMapperType(EcommerceLineItem::class);
         $props = [];
+        foreach ($properties as $property) {
+            $props[] = $this->constructExternalPropertyMapping($property);
+        }
+        return new ExternalSyncSettings([
+            'properties' => $props
+        ]);
+
 //        $props[] = new ExternalPropertyMapping('discount_amount', 'discount',
 //            ExternalPropertyMapping::DATA_TYPE_NUMBER);
 //        $props[] = new ExternalPropertyMapping('quantity', 'quantity',
@@ -163,10 +181,6 @@ class EcommSettingsService extends Component
 //            ExternalPropertyMapping::DATA_TYPE_NUMBER);
 //        $props[] = new ExternalPropertyMapping('tax_amount', 'tax_amount',
 //            ExternalPropertyMapping::DATA_TYPE_NUMBER);
-
-        return new ExternalSyncSettings([
-            'properties' => $props
-        ]);
     }
 
 

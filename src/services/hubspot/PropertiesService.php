@@ -133,26 +133,22 @@ class PropertiesService extends Component
 
     /**
      * @param string $mapperType
-     * @return array|null[]|HubSpotObjectProperty[]
+     * @return HubSpotObjectProperty[]
      * @throws \yii\base\InvalidConfigException
      */
-    public function getAllPropertiesForMapperType(string $mapperType)
+    public function getAllPropertiesForMapperType(string $mapperType): array
     {
         $mappers = HubSpotToolbox::$plugin->propertyMappings->getPropertyMappersByType($mapperType);
-        $propertyIds = [];
-        $objectType = null;
+        $properties = [];
         foreach ($mappers as $mapper) {
-            if (!$objectType) {
-                $objectType = $mapper::getHubSpotObjectType();
-            }
+            /** @var HubSpotObjectProperty $property */
             foreach ($mapper->getProperties() as $property) {
-                $propertyIds[$property->id] = true;
+                if (!isset($properties[$property->name])) {
+                    $properties[$property->name] = $property;
+                }
             }
         }
-        $ids = array_keys($propertyIds);
-        return array_map(function ($id) use ($objectType) {
-            return $this->getPropertyById($objectType, $id);
-        }, $ids);
+        return $properties;
     }
 
     /**

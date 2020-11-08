@@ -18,6 +18,12 @@ class ExternalPropertyMapping extends HubSpotEntity
     public string $hubspotPropertyName = '';
     public string $dataType = '';
 
+    /**
+     * ExternalPropertyMapping constructor.
+     * @param $externalPropertyName
+     * @param $hubspotPropertyName
+     * @param $dataType
+     */
     public function __construct($externalPropertyName, $hubspotPropertyName, $dataType)
     {
         parent::__construct([
