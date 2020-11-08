@@ -69,9 +69,10 @@ class EcommerceProduct extends MultiTypePropertyMapper implements PreviewablePro
 
     public function getRecommendedMappings(): array
     {
+        // TODO: Refactor
         $mappings = [];
         $mappings[] = new HubSpotObjectMapping(['property' => 'price', 'template' => '{variant.price}']);
-        $mappings[] = new HubSpotObjectMapping(['property' => 'description', 'template' => '{variant.product.description}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'description', 'template' => '{variant.description}']);
         $mappings[] = new HubSpotObjectMapping(['property' => 'name', 'template' => '{variant.title}']);
         $mappings[] = new HubSpotObjectMapping(['property' => 'hs_sku', 'template' => '{variant.sku}']);
         return $mappings;

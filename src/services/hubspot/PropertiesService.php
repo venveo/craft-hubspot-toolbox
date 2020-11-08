@@ -10,26 +10,32 @@
 
 namespace venveo\hubspottoolbox\services\hubspot;
 
-use Craft;
 use craft\base\Component;
-use craft\db\ActiveQuery;
+use craft\base\MemoizableArray;
 use craft\db\Query;
-use craft\errors\MissingComponentException;
 use craft\helpers\ArrayHelper;
-use craft\helpers\Component as ComponentHelper;
-use craft\helpers\DateTimeHelper;
 use venveo\hubspottoolbox\entities\ObjectProperty;
 use venveo\hubspottoolbox\HubSpotToolbox;
-use venveo\hubspottoolbox\models\HubSpotObjectMapping;
+use venveo\hubspottoolbox\models\HubSpotObjectProperty;
 use venveo\hubspottoolbox\propertymappers\PropertyMapperInterface;
-use venveo\hubspottoolbox\propertymappers\PropertyMapperPipeline;
-use venveo\hubspottoolbox\records\HubSpotObjectMapper as HubSpotObjectMapperRecord;
-use venveo\hubspottoolbox\records\HubSpotObjectMapping as HubSpotObjectMappingRecord;
+use venveo\hubspottoolbox\records\HubSpotObjectProperty as HubSpotObjectPropertyRecord;
 use venveo\hubspottoolbox\traits\HubSpotTokenAuthorization;
 
 class PropertiesService extends Component
 {
     use HubSpotTokenAuthorization;
+
+    /**
+     * @var MemoizableArray|null
+     * @see $_properties()
+     */
+    private $_properties;
+
+    /**
+     * @var MemoizableArray|null
+     * @see $_propertiesFromApi()
+     */
+    private $_propertiesFromApi;
 
     /**
      * Gets all properties for a type of object from HubSpot
@@ -38,268 +44,152 @@ class PropertiesService extends Component
      * @param string[] $specificProperties
      * @return ObjectProperty[]
      */
-    public function getObjectProperties($objectType, $specificProperties = []): array
+    public function getPropertiesFromApi($objectType, $specificProperties = []): array
     {
-        $data = $this->getHubSpot()->objectProperties($objectType)->all()->getData();
+        $data = $this->_propertiesFromApi($objectType);
         if (count($specificProperties)) {
-            $data = array_filter($data, function ($item) use ($specificProperties) {
-                return in_array($item->name, $specificProperties, true);
-            });
+            return ArrayHelper::index($data->whereIn('name', $specificProperties)->all(), 'name');
         }
-        $properties = array_map(function ($item) {
-            return new ObjectProperty($item);
-        }, $data);
-        return $properties;
+
+        return ArrayHelper::index($data->all(), 'name');
     }
 
     /**
-     * @param $type
-     * @param null $sourceTypeId
-     * @return PropertyMapperInterface
+     * @param string $objectType
+     * @param string $propertyName
+     * @return ObjectProperty|null
      */
-    public function getMapper($type, $sourceTypeId = null): PropertyMapperInterface
+    public function getPropertyFromApi(string $objectType, string $propertyName): ?ObjectProperty
     {
-        return $this->getOrCreateObjectMapper($type, $sourceTypeId, true);
+        return $this->_propertiesFromApi($objectType)->firstWhere('name', $propertyName);
     }
 
     /**
-     * @param HubSpotObjectMapping $mapping
-     * @return bool
-     * @throws \Exception
+     * @return Query
      */
-    public function saveMapping(HubSpotObjectMapping $mapping): bool
+    protected function _createPropertyQuery(): Query
     {
-        if ($mapping->id) {
-            $record = $this->_createMappingQuery()->where(['=', 'id', $mapping->id])->one();
-        } else {
-            $record = new HubSpotObjectMappingRecord();
-            $record->mapperId = $mapping->mapperId;
-        }
-        if (!$record) {
-            throw new \Exception('Mapping not found');
-        }
-        $record->property = $mapping->property;
-        $record->template = $mapping->template;
-        $record->datePublished = $mapping->datePublished;
-        $record->save();
-        $mapping->id = $record->id;
-        $mapping->dateCreated = $record->dateCreated;
-        $mapping->dateUpdated = $record->dateUpdated;
-        $mapping->uid = $record->uid;
-        return true;
+        return (new Query())
+            ->select([
+                'id',
+                'objectType',
+                'name',
+                'dataType',
+            ])
+            ->from([HubSpotObjectPropertyRecord::tableName()]);
     }
 
     /**
-     * @param $id
-     * @return HubSpotObjectMapping|null
+     * @param string $objectType
+     * @param int $id
+     * @return HubSpotObjectProperty|null
      */
-    public function getMappingById($id) {
-        $mapping = $this->_createMappingQuery()->where(['id' => $id])->one();
-        if (!$mapping) {
-            return null;
-        }
-        return $this->_createPropertyMappingFromRecord($mapping);
+    public function getPropertyById(string $objectType, int $id): ?HubSpotObjectProperty
+    {
+        return $this->_properties($objectType)->firstWhere('id', $id);
     }
 
     /**
-     * @param HubSpotObjectMapping $mapping
-     * @return false|int
-     * @throws \Throwable
-     * @throws \yii\db\StaleObjectException
+     * @param $objectType
+     * @param $propertyName
+     * @param $dataType
+     * @return HubSpotObjectProperty
      */
-    public function deleteMapping(HubSpotObjectMapping $mapping) {
-        return HubSpotObjectMappingRecord::findOne($mapping->id)->delete();
+    public function getOrCreateProperty($objectType, $propertyName, $dataType): HubSpotObjectProperty
+    {
+        $propertyData = $this->_createPropertyQuery()->andWhere([
+            'objectType' => $objectType,
+            'name' => $propertyName,
+            'dataType' => $dataType
+        ])->one();
+        if ($propertyData) {
+            return new HubSpotObjectProperty($propertyData);
+        }
+
+        $propertyRecord = new HubSpotObjectPropertyRecord([
+            'objectType' => $objectType,
+            'name' => $propertyName,
+            'dataType' => $dataType
+        ]);
+        $propertyRecord->save();
+        $this->_properties = null;
+
+        return new HubSpotObjectProperty([
+            'id' => $propertyRecord->id,
+            'objectType' => $propertyRecord->objectType,
+            'name' => $propertyRecord->name,
+            'dataType' => $propertyRecord->dataType
+        ]);
     }
 
     /**
      * @param PropertyMapperInterface $mapper
-     * @throws \Throwable
-     * @throws \yii\db\Exception
-     * @throws \yii\db\StaleObjectException
+     * @return array
      */
-    public function publishMappings(PropertyMapperInterface $mapper): void
+    public function getAllPropertiesForMapper(PropertyMapperInterface $mapper): array
     {
-        $record = HubSpotObjectMapperRecord::findOne($mapper->id);
-        $unpublishedMappings = $record->getUnpublishedMappings()->all();
-        $unpublishedMappingProperties = ArrayHelper::getColumn($unpublishedMappings, 'property');
-        $publishedMappings = $record->getPublishedMappings()->andWhere([
-            'IN',
-            'property',
-            $unpublishedMappingProperties
-        ])->all();
-
-        $transaction = Craft::$app->getDb()->beginTransaction();
-        try {
-            foreach ($publishedMappings as $mapping) {
-                $mapping->delete();
-            }
-            /** @var HubSpotObjectMappingRecord $unpublishedMapping */
-            foreach ($unpublishedMappings as $unpublishedMapping) {
-                $unpublishedMapping->datePublished = DateTimeHelper::currentUTCDateTime();
-                $unpublishedMapping->save();
-            }
-            $transaction->commit();
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            throw $e;
-        }
-        HubSpotToolbox::$plugin->ecommSettings->saveMappingSettings();
+        return ArrayHelper::index($this->_properties($mapper::getHubSpotObjectType())->all(), 'name');
     }
 
     /**
-     * @param HubSpotObjectMapperRecord $mapperRecord
-     * @param false $setProperties
-     * @return PropertyMapperInterface
-     * @throws \yii\base\InvalidConfigException
-     */
-    public function _createPropertyMapperFromRecord(HubSpotObjectMapperRecord $mapperRecord, $setProperties = false): PropertyMapperInterface
-    {
-
-        $config = [
-            'type' => $mapperRecord->type,
-            'id' => $mapperRecord->id,
-            'sourceTypeId' => $mapperRecord->sourceTypeId,
-            'dateCreated' => $mapperRecord->dateCreated,
-            'dateUpdated' => $mapperRecord->dateUpdated,
-            'uid' => $mapperRecord->uid,
-        ];
-        $mappings = array_map(function ($mapping) {
-            return new HubSpotObjectMapping($mapping);
-        }, $mapperRecord->mappings);
-        $mapper = $this->_createPropertyMapper($config);
-        $mappingsByName = ArrayHelper::index($mappings, 'property');
-        $mapper->setPropertyMappings($mappingsByName);
-        if ($setProperties) {
-            $propertiesByName = ArrayHelper::index($this->getObjectProperties($mapper::getHubSpotObjectName()), 'name');
-            $mapper->setProperties($propertiesByName);
-        }
-        return $mapper;
-    }
-
-    /**
-     * @param $mapperType
-     * @return array|PropertyMapperInterface[]
-     */
-    public function getPropertyMappersByType($mapperType)
-    {
-        /** @var HubSpotObjectMapperRecord $mapperRecord */
-        $mapperRecords = $this->_createMapperQuery($mapperType)->with(['mappings'])->all();
-
-        return array_map(function ($mapper) {
-            return $this->_createPropertyMapperFromRecord($mapper);
-        }, $mapperRecords);
-    }
-
-    /**
-     * Gets or creates a property mapper from its type.
      * @param string $mapperType
-     * @param null|int $sourceTypeId
-     * @param bool $setProperties
-     * @return PropertyMapperInterface
-     */
-    public function getOrCreateObjectMapper(
-        string $mapperType,
-        $sourceTypeId = null,
-        $setProperties = false
-    ): PropertyMapperInterface {
-        /** @var HubSpotObjectMapperRecord $mapperRecord */
-        $mapperRecord = $this->_createMapperQuery($mapperType, $sourceTypeId)->with(['mappings'])->one();
-        if (!$mapperRecord) {
-            $mapperRecord = new HubSpotObjectMapperRecord([
-                'type' => $mapperType,
-                'sourceTypeId' => $sourceTypeId
-            ]);
-            $mapperRecord->save();
-        }
-        $mapper = $this->_createPropertyMapperFromRecord($mapperRecord, $setProperties);
-        return $mapper;
-    }
-
-    /**
-     * @param HubSpotObjectMappingRecord $propertyMappingRecord
-     * @return HubSpotObjectMapping
-     */
-    protected function _createPropertyMappingFromRecord(HubSpotObjectMappingRecord $propertyMappingRecord): HubSpotObjectMapping
-    {
-        $propertyMapping = new HubSpotObjectMapping();
-        $propertyMapping->property = $propertyMappingRecord->property;
-        $propertyMapping->uid = $propertyMappingRecord->uid;
-        $propertyMapping->id = $propertyMappingRecord->id;
-        $propertyMapping->template = $propertyMappingRecord->template;
-        $propertyMapping->dateCreated = $propertyMappingRecord->dateCreated;
-        $propertyMapping->datePublished = $propertyMappingRecord->datePublished;
-        $propertyMapping->dateUpdated = $propertyMappingRecord->dateUpdated;
-
-        return $propertyMapping;
-    }
-
-    /**
-     * @param $config
-     * @return PropertyMapperInterface
+     * @return array|null[]|HubSpotObjectProperty[]
      * @throws \yii\base\InvalidConfigException
      */
-    protected function _createPropertyMapper($config): PropertyMapperInterface
+    public function getAllPropertiesForMapperType(string $mapperType)
     {
-        if (is_string($config)) {
-            $config = ['type' => $config];
+        $mappers = HubSpotToolbox::$plugin->propertyMappings->getPropertyMappersByType($mapperType);
+        $propertyIds = [];
+        $objectType = null;
+        foreach ($mappers as $mapper) {
+            if (!$objectType) {
+                $objectType = $mapper::getHubSpotObjectType();
+            }
+            foreach ($mapper->getProperties() as $property) {
+                $propertyIds[$property->id] = true;
+            }
         }
-
-        try {
-            /** @var PropertyMapperInterface $feature */
-            $propertyMapper = ComponentHelper::createComponent($config, PropertyMapperInterface::class);
-        } catch (MissingComponentException $e) {
-            $config['errorMessage'] = $e->getMessage();
-            $config['expectedType'] = $config['type'];
-            unset($config['type']);
-            $propertyMapper = null;
-        }
-        return $propertyMapper;
+        $ids = array_keys($propertyIds);
+        return array_map(function ($id) use ($objectType) {
+            return $this->getPropertyById($objectType, $id);
+        }, $ids);
     }
 
     /**
-     * @return ActiveQuery
-     */
-    protected function _createMappingQuery(): ActiveQuery
-    {
-        return HubSpotObjectMappingRecord::find();
-    }
-
-
-    /**
-     * @param $mapperType
-     * @param null $sourceTypeId
-     * @return ActiveQuery
-     */
-    protected function _createMapperQuery($mapperType, $sourceTypeId = null): ActiveQuery
-    {
-        $query = HubSpotObjectMapperRecord::find()->where(['=', 'type', $mapperType]);
-        if ($sourceTypeId !== null) {
-            $query->andWhere(['sourceTypeId' => $sourceTypeId]);
-        }
-        return $query;
-    }
-
-    public function createPropertyMapperPipeline($mapperType): PropertyMapperPipeline
-    {
-        $mappers = $this->getPropertyMappersByType($mapperType);
-        /** @var PropertyMapperPipeline $pipeline */
-        $pipeline = \Craft::createObject(PropertyMapperPipeline::class);
-        $pipeline->setPropertyMappers($mappers);
-        return $pipeline;
-    }
-
-    /**
-     * Produces an array of all unique, published property names for a mapper type
+     * Returns a memoizable array of all stored properties.
      *
-     * @param string $mapperType
-     * @return string[]
+     * @param string $objectType
+     * @return MemoizableArray
      */
-    public function getAllUniqueMappedPropertyNames(string $mapperType): array
+    private function _properties(string $objectType): MemoizableArray
     {
-        return (new Query())->select(['mapping.property'])->distinct(true)->from(['mapping' => HubSpotObjectMappingRecord::tableName()])
-            ->leftJoin(['mapper' => HubSpotObjectMapperRecord::tableName()], '[[mapper.id]] = [[mapping.mapperId]]')
-            ->where(['mapper.type' => $mapperType])
-            ->andWhere(['NOT', ['mapping.datePublished' => null]])
-            ->column();
+        if (!isset($this->_properties[$objectType])) {
+            $properties = [];
+            foreach ($this->_createPropertyQuery()->where(['objectType' => $objectType])->all() as $result) {
+                $properties[] = new HubSpotObjectProperty($result);
+            }
+            $this->_properties[$objectType] = new MemoizableArray($properties);
+        }
+
+        return $this->_properties[$objectType];
     }
+
+    /**
+     * @param string $objectType
+     * @return MemoizableArray
+     * @throws \Exception
+     */
+    private function _propertiesFromApi(string $objectType): MemoizableArray
+    {
+        if (!isset($this->_propertiesFromApi[$objectType])) {
+            $data = $this->getHubSpot()->objectProperties($objectType)->all()->getData();
+            $properties = array_map(function ($item) {
+                return new ObjectProperty($item);
+            }, $data);
+            $this->_propertiesFromApi[$objectType] = new MemoizableArray($properties);
+        }
+
+        return $this->_propertiesFromApi[$objectType];
+    }
+
 }

@@ -21,10 +21,11 @@ export default {
         return axios.get(Craft.getActionUrl('hubspot-toolbox/object-property-mapping/get-object-mappings', {mapper, sourceTypeId, previewObjectId}))
     },
 
-    saveObjectMapping(mapping, mapper, sourceTypeId, previewObjectId = null) {
+    saveObjectMapping(mapping, mapper, sourceTypeId, property, previewObjectId = null) {
         return axios.post(Craft.getActionUrl('hubspot-toolbox/object-property-mapping/save-object-mapping'), {
             mapping,
             mapper,
+            property,
             sourceTypeId,
             previewObjectId
         }, {

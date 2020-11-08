@@ -2,62 +2,73 @@
 
 namespace venveo\hubspottoolbox\models;
 
+use craft\base\Model;
 use venveo\hubspottoolbox\entities\ObjectProperty;
-use yii\base\Model;
+use venveo\hubspottoolbox\HubSpotToolbox;
+use venveo\hubspottoolbox\propertymappers\PropertyMapperInterface;
 
+/**
+ *
+ * @property-read \venveo\hubspottoolbox\models\HubSpotObjectProperty $property
+ * @property-read \venveo\hubspottoolbox\propertymappers\PropertyMapperInterface $mapper
+ * @property-read null|\venveo\hubspottoolbox\entities\ObjectProperty $propertyFromApi
+ */
 class HubSpotObjectMapping extends Model
 {
     public $id;
     public int $mapperId;
-    public string $property;
+    public int $propertyId;
     public $template;
-    public $uid;
-
     public $datePublished;
+
+    public $uid;
     public $dateCreated;
     public $dateUpdated;
 
     protected $objectProperty;
 
-    protected $renderedValue;
-
     /**
      * @return ObjectProperty
      */
-    public function getObjectProperty()
+    public function getPropertyFromApi(): ?ObjectProperty
     {
-        return $this->objectProperty;
+        return HubSpotToolbox::$plugin->properties->getPropertyFromApi($this->getMapper()::getHubSpotObjectType(), $this->getProperty()->name);
     }
 
     /**
-     * @param ObjectProperty $objectProperty
+     * @return HubSpotObjectProperty
      */
-    public function setObjectProperty(ObjectProperty $objectProperty): void
+    public function getProperty(): HubSpotObjectProperty
     {
-        $this->objectProperty = $objectProperty;
+        return HubSpotToolbox::$plugin->properties->getPropertyById($this->getMapper()::getHubSpotObjectType(), $this->propertyId);
     }
 
     /**
-     * @return mixed
+     * @return PropertyMapperInterface
      */
-    public function getRenderedValue()
+    public function getMapper(): PropertyMapperInterface
     {
-        return $this->renderedValue;
+        return HubSpotToolbox::$plugin->propertyMappings->getPropertyMapperById($this->mapperId);
     }
 
     /**
-     * @param mixed $renderedValue
+     * @inheritdoc
      */
-    public function setRenderedValue($renderedValue): void
-    {
-        $this->renderedValue = $renderedValue;
-    }
-
     public function extraFields()
     {
         return [
-            'objectProperty',
-            'renderedValue'
+            'propertyFromApi',
+            'property'
         ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function defineRules(): array
+    {
+        $rules = parent::defineRules();
+        $rules[] = [['mapperId', 'dataType', 'property'], 'required'];
+        return $rules;
     }
 }

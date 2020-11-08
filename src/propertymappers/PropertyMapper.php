@@ -8,10 +8,17 @@ namespace venveo\hubspottoolbox\propertymappers;
 
 use Craft;
 use craft\base\Component;
-use venveo\hubspottoolbox\entities\ObjectProperty;
+use venveo\hubspottoolbox\HubSpotToolbox;
 use venveo\hubspottoolbox\models\HubSpotObjectMapping;
+use venveo\hubspottoolbox\models\HubSpotObjectProperty;
 
 
+/**
+ *
+ * @property-read array $propertyMappings
+ * @property-read array $propertiesFromApi
+ * @property-read \venveo\hubspottoolbox\models\HubSpotObjectProperty[] $properties
+ */
 abstract class PropertyMapper extends Component implements PropertyMapperInterface
 {
     /**
@@ -34,14 +41,7 @@ abstract class PropertyMapper extends Component implements PropertyMapperInterfa
      * @var \DateTime
      */
     public $dateUpdated;
-    /**
-     * @var HubSpotObjectMapping[]
-     */
-    protected $propertyMappings = [];
-    /**
-     * @var ObjectProperty[]
-     */
-    protected array $properties = [];
+
     protected $_type = null;
 
     /**
@@ -65,31 +65,23 @@ abstract class PropertyMapper extends Component implements PropertyMapperInterfa
      */
     public function getPropertyMappings(): array
     {
-        return $this->propertyMappings;
+        return HubSpotToolbox::$plugin->propertyMappings->getMappingsForMapper($this->id);
     }
 
     /**
-     * @inheritdoc
-     */
-    public function setPropertyMappings(array $propertyMappings): void
-    {
-        $this->propertyMappings = $propertyMappings;
-    }
-
-    /**
-     * @inheritdoc
+     * @return HubSpotObjectProperty[]
      */
     public function getProperties(): array
     {
-        return $this->properties;
+        return HubSpotToolbox::$plugin->properties->getAllPropertiesForMapper($this);
     }
 
     /**
      * @inheritdoc
      */
-    public function setProperties(array $properties): void
+    public function getPropertiesFromApi(): array
     {
-        $this->properties = $properties;
+        return HubSpotToolbox::$plugin->properties->getPropertiesFromApi(static::getHubSpotObjectType());
     }
 
     /**
@@ -98,8 +90,8 @@ abstract class PropertyMapper extends Component implements PropertyMapperInterfa
     public function renderTemplates($source): array
     {
         $results = [];
-        foreach ($this->propertyMappings as $property) {
-            $results[$property->property] = $this->renderProperty($property, $source);
+        foreach ($this->propertyMappings as $mapping) {
+            $results[$mapping->getProperty()->name] = $this->renderProperty($mapping, $source);
         }
         return $results;
     }
@@ -140,6 +132,7 @@ abstract class PropertyMapper extends Component implements PropertyMapperInterfa
         $extra = parent::extraFields();
         $extra[] = 'type';
         $extra[] = 'properties';
+        $extra[] = 'propertiesFromApi';
         $extra[] = 'propertyMappings';
         if ($this instanceof PreviewablePropertyMapperInterface) {
             $extra[] = 'initialPreviewObjectId';

@@ -63,25 +63,11 @@ interface PropertyMapperInterface extends \ArrayAccess, Arrayable, \IteratorAggr
     public function getPropertyMappings(): array;
 
     /**
-     * Sets all of the configured mappings for this mapper
-     *
-     * @param HubSpotObjectMapping[] $mappings
-     */
-    public function setPropertyMappings(array $mappings);
-
-    /**
      * Get all applicable object properties on this mapper
      *
      * @return ObjectProperty[]
      */
-    public function getProperties(): array;
-
-    /**
-     * Sets all applicable object properties on this mapper
-     *
-     * @param ObjectProperty[] $properties
-     */
-    public function setProperties(array $properties);
+    public function getPropertiesFromApi(): array;
 
     /**
      * Provides an array of params to be passed into object templates

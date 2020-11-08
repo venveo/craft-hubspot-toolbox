@@ -6,7 +6,6 @@ use craft\commerce\elements\Order;
 use craft\commerce\models\Customer;
 use craft\commerce\Plugin;
 use venveo\hubspottoolbox\enums\HubSpotObjectType;
-use venveo\hubspottoolbox\models\HubSpotObjectMapping;
 use venveo\hubspottoolbox\traits\PreviewableMapperTrait;
 
 class EcommerceContact extends PropertyMapper implements PreviewablePropertyMapperInterface
@@ -51,9 +50,10 @@ class EcommerceContact extends PropertyMapper implements PreviewablePropertyMapp
 
     public function getRecommendedMappings(): array
     {
+        // TODO: Refactor
         $mappings = [];
-        $mappings[] = new HubSpotObjectMapping(['property' => 'firstname', 'template' => '{customer.billingAddress.firstName}']);
-        $mappings[] = new HubSpotObjectMapping(['property' => 'lastname', 'template' => '{customer.billingAddress.firstName}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'firstname', 'template' => '{customer.primaryBillingAddress.firstName}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'lastname', 'template' => '{customer.primaryBillingAddress.lastName}']);
         $mappings[] = new HubSpotObjectMapping(['property' => 'email', 'template' => '{customerOrder.email}']);
         $mappings[] = new HubSpotObjectMapping(['property' => 'phone', 'template' => '{customer.primaryShippingAddress.phone|default(customer.primaryBillingAddress.phone)}']);
         $mappings[] = new HubSpotObjectMapping(['property' => 'city', 'template' => '{customer.primaryShippingAddress.city}']);

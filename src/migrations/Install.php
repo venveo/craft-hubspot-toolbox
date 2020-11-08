@@ -66,7 +66,18 @@ class Install extends Migration
         $this->createTable('{{%hubspot_object_mappers}}', [
             'id' => $this->primaryKey(),
             'type' => $this->string(128)->notNull(),
+//            'sourceTypeGroup' => $this->string(128)->null(), // TODO
             'sourceTypeId' => $this->string(128)->null(),
+            'dateCreated' => $this->dateTime()->notNull(),
+            'dateUpdated' => $this->dateTime()->notNull(),
+            'uid' => $this->uid(),
+        ]);
+
+        $this->createTable('{{%hubspot_object_properties}}', [
+            'id' => $this->primaryKey(),
+            'objectType' => $this->string(32)->notNull(),
+            'name' => $this->string(32)->notNull(),
+            'dataType' => $this->string(32)->notNull(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),
             'uid' => $this->uid(),
@@ -75,7 +86,7 @@ class Install extends Migration
         $this->createTable('{{%hubspot_object_mappings}}', [
             'id' => $this->primaryKey(),
             'mapperId' => $this->integer()->notNull(),
-            'property' => $this->string()->notNull(),
+            'propertyId' => $this->integer()->notNull(),
             'template' => $this->text(),
             'datePublished' => $this->dateTime(),
             'dateCreated' => $this->dateTime()->notNull(),
@@ -86,25 +97,27 @@ class Install extends Migration
         $this->createTable('{{%hubspot_element_map}}', [
             'id' => $this->primaryKey(),
             'elementId' => $this->integer()->notNull(),
-            'elementSiteId' => $this->integer()->notNull(),
+            'siteId' => $this->integer()->notNull(),
             'remoteObjectId' => $this->integer()->notNull(),
-            'dateLastSynced' => $this->dateTime()->null(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),
             'uid' => $this->uid(),
         ]);
 
         $this->createIndex(null, '{{%hubspot_element_map}}', ['remoteObjectId'], true);
-        $this->createIndex(null, '{{%hubspot_element_map}}', ['elementId'], true);
+        $this->createIndex(null, '{{%hubspot_element_map}}', ['elementId', 'siteId'], true);
 
-        $this->addForeignKey(null, '{{%hubspot_object_mappings}}', ['mapperId'], '{{%hubspot_object_mappers}}', ['id']);
+        $this->addForeignKey(null, '{{%hubspot_object_mappings}}', ['mapperId'], '{{%hubspot_object_mappers}}', ['id'], 'CASCADE', 'CASCADE');
+        $this->addForeignKey(null, '{{%hubspot_object_mappings}}', ['propertyId'], '{{%hubspot_object_properties}}', ['id'], 'CASCADE', 'CASCADE');
+
         $this->addForeignKey(null, '{{%hubspot_element_map}}', ['elementId'], Table::ELEMENTS, ['id']);
-        $this->addForeignKey(null, '{{%hubspot_element_map}}', ['elementSiteId'], Table::SITES, ['id']);
+        $this->addForeignKey(null, '{{%hubspot_element_map}}', ['siteId'], Table::SITES, ['id']);
     }
 
     public function safeDown()
     {
         $this->dropTableIfExists('{{%hubspot_element_map}}');
+        $this->dropTableIfExists('{{%hubspot_object_properties}}');
         $this->dropTableIfExists('{{%hubspot_object_mappings}}');
         $this->dropTableIfExists('{{%hubspot_object_mappers}}');
         $this->dropTableIfExists('{{%hubspot_tokens}}');

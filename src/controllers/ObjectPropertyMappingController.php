@@ -20,7 +20,7 @@ class ObjectPropertyMappingController extends Controller
     public function actionGetObjectMappings()
     {
         $mapper = $this->getMapperFromRequest();
-        $attributes = ['properties', 'propertyMappings'];
+        $attributes = ['propertiesFromApi', 'propertyMappings.property'];
         $data = $mapper->toArray([], $attributes);
         $data['previewData'] = [];
         if ($mapper instanceof PreviewablePropertyMapperInterface) {
@@ -38,14 +38,24 @@ class ObjectPropertyMappingController extends Controller
         $this->requirePostRequest();
         $data = \Craft::$app->request->getRequiredBodyParam('mapping');
         $mapper = $this->getMapperFromRequest();
+
+        $propertyData = \Craft::$app->request->getBodyParam('property');
+        if ($propertyData) {
+            $property = HubSpotToolbox::$plugin->properties->getOrCreateProperty($mapper::getHubSpotObjectType(),
+                $propertyData['name'], $propertyData['dataType']);
+        } else {
+            $property = HubSpotToolbox::$plugin->properties->getPropertyById($mapper::getHubSpotObjectType(),
+                $data['propertyId']);
+        }
+
         $mapping = new HubSpotObjectMapping([
             'id' => $data['id'] ?? null,
-            'property' => $data['property'],
             'template' => $data['template'] ?? '',
+            'propertyId' => $property->id,
             'mapperId' => $mapper->id,
             'datePublished' => null
         ]);
-        HubSpotToolbox::$plugin->properties->saveMapping($mapping);
+        HubSpotToolbox::$plugin->propertyMappings->saveMapping($mapping);
         $mappingData = $mapping->toArray();
         if ($mapper instanceof PreviewablePropertyMapperInterface) {
             $previewId = $this->getPreviewSourceFromRequest();
@@ -61,7 +71,7 @@ class ObjectPropertyMappingController extends Controller
         $this->requireAcceptsJson();
         $this->requirePostRequest();
         $mapper = $this->getMapperFromRequest();
-        HubSpotToolbox::$plugin->properties->publishMappings($mapper);
+        HubSpotToolbox::$plugin->propertyMappings->publishMappings($mapper);
         return $this->asJson(['success' => true]);
     }
 
@@ -73,21 +83,25 @@ class ObjectPropertyMappingController extends Controller
         $mapperType = \Craft::$app->request->getRequiredParam('mapper');
         $sourceTypeId = \Craft::$app->request->getParam('sourceTypeId');
 
-        if (class_exists($mapperType) && in_array(PropertyMapperInterface::class, class_implements($mapperType), true)) {
-            return self::$requestMapper = HubSpotToolbox::$plugin->properties->getMapper($mapperType, $sourceTypeId);
+        if (class_exists($mapperType) && in_array(PropertyMapperInterface::class, class_implements($mapperType),
+                true)) {
+            return self::$requestMapper = HubSpotToolbox::$plugin->propertyMappings->getOrCreateObjectMapper($mapperType,
+                $sourceTypeId);
         }
 
         throw new HttpException('Invalid mapper');
     }
 
-    protected function getPreviewSourceFromRequest() {
+    protected function getPreviewSourceFromRequest()
+    {
         /** @var PreviewablePropertyMapperInterface $mapper */
         $mapper = $this->getMapperFromRequest();
         $previewId = \Craft::$app->request->getParam('previewObjectId') ?? $mapper->getInitialPreviewObjectId();
         return $previewId;
     }
 
-    public function actionDeleteMapping() {
+    public function actionDeleteMapping()
+    {
         $this->requirePostRequest();
         $mappingId = \Craft::$app->request->getRequiredBodyParam('id');
         $mapping = HubSpotToolbox::$plugin->properties->getMappingById($mappingId);

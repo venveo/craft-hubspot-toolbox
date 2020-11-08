@@ -23,7 +23,7 @@
       <div class="select">
         <select v-model="selectedPropertyToAdd">
           <option disabled selected value="">Select Property</option>
-          <option v-for="(data, name) in properties" :value="name" :disabled="Object.keys(propertyMappings).includes(name)">{{ data.label }} - ({{ name }})</option>
+          <option v-for="(data, name) in propertiesFromApi" :value="name" :disabled="mappedPropertyNames.includes(name)">{{ data.label }} - ({{ name }})</option>
         </select>
       </div>
       <div>
@@ -47,12 +47,12 @@
       </tr>
       </thead>
       <tbody>
-      <mapped-property v-for="(mapping, name) in propertyMappings"
-                       v-model:template="propertyMappings[name].template"
-                       :property="properties[name]"
-                       :preview="previewData[name]"
-                       v-on:input="(e) => {handleTemplateChange(propertyMappings[name])}"
-                       v-on:delete="deletePropertyMapping(propertyMappings[name])"
+      <mapped-property v-for="(mapping, index) in propertyMappings"
+                       v-model:template="propertyMappings[index].template"
+                       :property="propertiesFromApi[mapping.property.name]"
+                       :preview="previewData[mapping.property.name]"
+                       v-on:input="(e) => {handleTemplateChange(propertyMappings[index])}"
+                       v-on:delete="deletePropertyMapping(propertyMappings[index])"
       />
       </tbody>
     </table>
@@ -75,7 +75,8 @@ export default {
       showingPropertyPicker: false,
 
       propertyMappings: [],
-      properties: [],
+
+      propertiesFromApi: {},
       previewData: {},
 
       selectedPropertyToAdd: '',
@@ -91,12 +92,19 @@ export default {
     }
   },
   mounted() {
-    this.fetchMappings().then(() => {})
+    this.fetchMappings()
+  },
+  computed: {
+    mappedPropertyNames: function() {
+      return this.propertyMappings.map(function(mapping) {
+        return mapping.property.name
+      }, this.propertyMappings)
+    }
   },
   methods: {
     async fetchMappings() {
       const {data} = await api.getObjectMappings(this.mapper, this.sourceTypeId, this.previewObjectId)
-      this.properties = omitBy(data.properties, prop => prop.readOnlyValue)
+      this.propertiesFromApi = omitBy(data.propertiesFromApi, prop => prop.readOnlyValue)
       this.propertyMappings = data.propertyMappings
       if (Object.keys(data).includes('sourceTypes')) {
         this.sourceTypes = data.sourceTypes
@@ -115,20 +123,15 @@ export default {
       const mapping = {
         property: this.selectedPropertyToAdd,
       }
-      await api.saveObjectMapping(mapping, this.mapper, this.sourceTypeId, this.previewObjectId);
+
+      const property = {
+        name: this.propertiesFromApi[this.selectedPropertyToAdd].name,
+        dataType: this.propertiesFromApi[this.selectedPropertyToAdd].type,
+      }
+      await api.saveObjectMapping(mapping, this.mapper, this.sourceTypeId, property, this.previewObjectId);
       await this.fetchMappings();
       this.loadingAddProperty = false
       this.selectedPropertyToAdd = '';
-    },
-    handleObjectTemplateChanged(mapped, e) {
-      const index = this.propertyMappings.findIndex((e) => {
-        return e.id === mapped.id;
-      })
-      this.propertyMappings[index].template = e.target.value
-    },
-    async saveMapping(mapped) {
-      await api.saveObjectMapping(mapped, this.mapper, this.sourceTypeId, this.previewObjectId);
-      this.fetchMappings();
     },
     async publishChanges() {
       await api.publishObjectMappings(this.mapper, this.sourceTypeId);
@@ -136,10 +139,10 @@ export default {
       alert('Published');
     },
     handleTemplateChange: debounce(function(mapping) {
-      api.saveObjectMapping(mapping, this.mapper, this.sourceTypeId, this.previewObjectId).then(v => {
+      api.saveObjectMapping(mapping, this.mapper, this.sourceTypeId, null, this.previewObjectId).then(v => {
         const mappingData = v.data
         if (Object.keys(mappingData).includes('previewData')) {
-          this.previewData[mapping.property] = mappingData.previewData.preview
+          this.previewData[mapping.property.name] = mappingData.previewData.preview
         }
       });
     }, 250),

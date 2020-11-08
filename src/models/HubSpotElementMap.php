@@ -2,8 +2,7 @@
 
 namespace venveo\hubspottoolbox\models;
 
-use venveo\hubspottoolbox\entities\ObjectProperty;
-use yii\base\Model;
+use craft\base\Model;
 
 class HubSpotElementMap extends Model
 {

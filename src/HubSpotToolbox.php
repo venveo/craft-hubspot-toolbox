@@ -26,6 +26,7 @@ use venveo\hubspottoolbox\services\hubspot\EcommDealsService;
 use venveo\hubspottoolbox\services\hubspot\EcommService;
 use venveo\hubspottoolbox\services\hubspot\EcommSettingsService;
 use venveo\hubspottoolbox\services\hubspot\PropertiesService;
+use venveo\hubspottoolbox\services\hubspot\PropertyMappingsService;
 use venveo\hubspottoolbox\services\OauthService;
 use yii\base\Event;
 
@@ -40,6 +41,7 @@ use yii\base\Event;
  * @property  EcommDealsService $ecommDeals
  * @property  EcommSettingsService $ecommSettings
  * @property  PropertiesService $properties
+ * @property  PropertyMappingsService $propertyMappings
  * @property-read array $cpNavItem
  * @property  Settings $settings
  * @method    Settings getSettings()
@@ -71,7 +73,8 @@ class HubSpotToolbox extends Plugin
             'ecommDeals' => EcommDealsService::class,
             'oauth' => OauthService::class,
             'features' => FeaturesService::class,
-            'properties' => PropertiesService::class
+            'properties' => PropertiesService::class,
+            'propertyMappings' => PropertyMappingsService::class
         ]);
 
         // Add in our Twig extensions
