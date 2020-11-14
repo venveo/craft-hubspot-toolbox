@@ -6,6 +6,7 @@ namespace venveo\hubspottoolbox\controllers\console;
 use craft\commerce\elements\Order;
 use craft\commerce\elements\Product;
 use craft\commerce\elements\Variant;
+use craft\commerce\records\LineItem;
 use craft\console\Controller;
 use venveo\hubspottoolbox\entities\ecommerce\ExternalSyncMessage;
 use venveo\hubspottoolbox\entities\ecommerce\SyncMessagesWithMetaData;
@@ -13,6 +14,7 @@ use venveo\hubspottoolbox\enums\HubSpotObjectType;
 use venveo\hubspottoolbox\HubSpotToolbox;
 use venveo\hubspottoolbox\propertymappers\EcommerceContact;
 use venveo\hubspottoolbox\propertymappers\EcommerceDeal;
+use venveo\hubspottoolbox\propertymappers\EcommerceLineItem;
 use venveo\hubspottoolbox\propertymappers\EcommerceProduct;
 
 class SyncController extends Controller
@@ -45,9 +47,10 @@ class SyncController extends Controller
 
     public function actionCustomers()
     {
-        $pipeline = HubSpotToolbox::$plugin->properties->createPropertyMapperPipeline(EcommerceContact::class);
+        $pipeline = HubSpotToolbox::$plugin->propertyMappings->createPropertyMapperPipeline(EcommerceContact::class);
         $settings = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
 
+        // TODO: This produces multiple customers - need to de-dupe somehow
         $orders = Order::find()->email(':notempty:')->batch(200);
 
         /** @var Product $product */
@@ -61,6 +64,7 @@ class SyncController extends Controller
             foreach ($batch as $order) {
                 $customer = $order->getCustomer();
                 $message = $pipeline->produceExternalSyncMessage($customer->id);
+
                 $this->stdout('Adding to batch ' . $batchNumber . ' - ' . $message->externalObjectId . PHP_EOL);
                 $syncMessageWrapper->addMessage($message);
             }
@@ -76,8 +80,7 @@ class SyncController extends Controller
 
     public function actionOrders()
     {
-        $pipeline = HubSpotToolbox::$plugin->properties->createPropertyMapperPipeline(EcommerceDeal::class);
-        $contactMapper = HubSpotToolbox::$plugin->properties->getMapper(EcommerceContact::class);
+        $pipeline = HubSpotToolbox::$plugin->propertyMappings->createPropertyMapperPipeline(EcommerceDeal::class);
         $settings = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
 
         $orders = Order::find()->batch(200);
@@ -95,7 +98,7 @@ class SyncController extends Controller
                 $email = $order->getEmail();
                 if ($email) {
                     $message->addAssociation(ExternalSyncMessage::ASSOCIATION_CONTACT,
-                        $contactMapper->getExternalObjectId($order->customerId));
+                        EcommerceContact::getExternalObjectId($order->customerId));
                 }
                 $this->stdout('Adding to batch ' . $batchNumber . ' - ' . $message->externalObjectId . PHP_EOL);
                 $syncMessageWrapper->addMessage($message);
@@ -105,6 +108,39 @@ class SyncController extends Controller
             } else {
                 print ('Failed to send ' . $batchNumber . PHP_EOL);
                 return 1;
+            }
+        }
+        return 0;
+    }
+
+    public function actionLineItems()
+    {
+        $pipeline = HubSpotToolbox::$plugin->propertyMappings->createPropertyMapperPipeline(EcommerceLineItem::class);
+        $settings = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
+
+        $lineItemsBatches = LineItem::find()->batch(200);
+
+        /** @var Product $product */
+        foreach ($lineItemsBatches as $batchNumber => $lineItemsBatch) {
+            $syncMessageWrapper = new SyncMessagesWithMetaData([
+                'storeId' => $settings->storeId,
+                'objectType' => HubSpotObjectType::LineItem
+            ]);
+            /** @var LineItem $lineItem */
+            foreach ($lineItemsBatch as $lineItem) {
+                $message = $pipeline->produceExternalSyncMessage($lineItem->id);
+                $message->addAssociation(ExternalSyncMessage::ASSOCIATION_DEAL,
+                    EcommerceDeal::getExternalObjectId($lineItem->orderId));
+                $message->addAssociation(ExternalSyncMessage::ASSOCIATION_PRODUCT,
+                    EcommerceProduct::getExternalObjectId($lineItem->purchasableId));
+                $this->stdout('Adding to batch ' . $batchNumber . ' - ' . $message->externalObjectId . PHP_EOL);
+                $syncMessageWrapper->addMessage($message);
+            }
+
+            if (HubSpotToolbox::$plugin->ecomm->sendSyncMessages($syncMessageWrapper)) {
+                print ('Sent batch ' . $batchNumber . PHP_EOL);
+            } else {
+                print ('Failed to send ' . $batchNumber . PHP_EOL);
             }
         }
         return 0;
