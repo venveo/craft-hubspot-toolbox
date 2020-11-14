@@ -58,7 +58,7 @@ class EcommerceLineItem extends PropertyMapper implements PreviewablePropertyMap
     }
 
 
-    public function getExternalObjectId($source)
+    public static function getExternalObjectId($source)
     {
         $lineitem = Plugin::getInstance()->getLineItems()->getLineItemById($source);
         return $lineitem->id;

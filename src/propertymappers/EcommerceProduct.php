@@ -78,7 +78,7 @@ class EcommerceProduct extends MultiTypePropertyMapper implements PreviewablePro
         return $mappings;
     }
 
-    public function getExternalObjectId($source)
+    public static function getExternalObjectId($source)
     {
         $variant = Variant::findOne($source);
         return $variant->uid;

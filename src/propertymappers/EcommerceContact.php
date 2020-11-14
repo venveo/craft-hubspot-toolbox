@@ -63,7 +63,7 @@ class EcommerceContact extends PropertyMapper implements PreviewablePropertyMapp
         return $mappings;
     }
 
-    public function getExternalObjectId($source)
+    public static function getExternalObjectId($source)
     {
         $customer = Plugin::getInstance()->customers->getCustomerById($source);
         $order = Order::find()->customerId($customer->id)->email(':notempty:')->one();

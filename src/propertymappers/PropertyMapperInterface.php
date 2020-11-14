@@ -106,7 +106,7 @@ interface PropertyMapperInterface extends \ArrayAccess, Arrayable, \IteratorAggr
      * @param $source
      * @return mixed
      */
-    public function getExternalObjectId($source);
+    public static function getExternalObjectId($source);
 
     /**
      * Returns whether the mapper can be applied to a source input
