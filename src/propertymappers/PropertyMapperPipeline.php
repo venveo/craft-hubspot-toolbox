@@ -25,8 +25,8 @@ class PropertyMapperPipeline extends Component {
             }
 
             foreach($propertyMapper->getPropertyMappings() as $mapping) {
-                if (!isset($properties[$mapping->property])) {
-                    $properties[$mapping->property] = $propertyMapper->renderProperty($mapping, $input);
+                if (!isset($properties[$mapping->getProperty()->name])) {
+                    $properties[$mapping->getProperty()->name] = $propertyMapper->renderProperty($mapping, $input);
                 }
             }
         }
