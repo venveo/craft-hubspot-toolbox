@@ -15,31 +15,26 @@ use venveo\hubspottoolbox\enums\HubSpotObjectType;
 use venveo\hubspottoolbox\features\EcommerceFeature;
 use venveo\hubspottoolbox\helpers\HubSpotTimeHelper;
 use venveo\hubspottoolbox\HubSpotToolbox;
+use venveo\hubspottoolbox\propertymappers\EcommerceProduct;
 
 class EcommerceListener
 {
     public static function handlePurchasableSaved(ModelEvent $e) {
+        $pipeline = HubSpotToolbox::$plugin->propertyMappings->createPropertyMapperPipeline(EcommerceProduct::class);
         /** @var EcommerceFeature $feature */
-        $feature = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
+        $settings = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
 
         /** @var Purchasable $purchasable */
         $purchasable = $e->sender;
-        $syncMessage = new ExternalSyncMessage([
-            'action' => ExternalSyncMessage::ACTION_UPSERT,
-            'changedAt' => HubSpotTimeHelper::prepareDateTimeForHubSpot(),
-            'externalObjectId' => $purchasable->id,
-            'properties' => [
-                'product_name' => $purchasable->title,
-                'product_price' => $purchasable->price,
-                'product_description' => $purchasable->description
-            ]
-        ]);
-        $payload = new SyncMessagesWithMetaData();
-        $payload->objectType = HubSpotObjectType::Product;
-        $payload->storeId = $feature->storeId;
-        $payload->addMessage($syncMessage);
 
-        HubSpotToolbox::$plugin->ecomm->sendSyncMessages($payload);
+        $syncMessageWrapper = new SyncMessagesWithMetaData([
+            'storeId' => $settings->storeId,
+            'objectType' => HubSpotObjectType::Product
+        ]);
+
+        $message = $pipeline->produceExternalSyncMessage($purchasable->id);
+        $syncMessageWrapper->addMessage($message);
+        HubSpotToolbox::$plugin->ecomm->sendSyncMessages($syncMessageWrapper);
     }
 
     public static function handlePurchasableDeleted(ModelEvent $e) {

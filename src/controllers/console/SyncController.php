@@ -21,7 +21,7 @@ class SyncController extends Controller
 {
     public function actionProducts()
     {
-        $pipeline = HubSpotToolbox::$plugin->properties->createPropertyMapperPipeline(EcommerceProduct::class);
+        $pipeline = HubSpotToolbox::$plugin->propertyMappings->createPropertyMapperPipeline(EcommerceProduct::class);
         $settings = HubSpotToolbox::$plugin->features->getFeatureByHandle('ecommerce');
         /** @var Product $product */
         foreach (Variant::find()->batch(200) as $batchNumber => $batch) {

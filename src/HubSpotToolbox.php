@@ -111,7 +111,7 @@ class HubSpotToolbox extends Plugin
             });
 
             Event::on(Order::class, Order::EVENT_AFTER_SAVE, function (ModelEvent $e) {
-                EcommerceListener::handleOrderSaved($e);
+//                EcommerceListener::handleOrderSaved($e);
             });
         });
 
