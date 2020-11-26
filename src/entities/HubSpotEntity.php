@@ -5,9 +5,10 @@ use craft\base\Model;
 
 abstract class HubSpotEntity extends Model {
     /**
+     * @param bool $filterNull
      * @return array
      */
-    public function prepareForApi(): array
+    public function prepareForApi($filterNull = true): array
     {
         $data = [];
         foreach($this->getAttributes() as $attribute => $value) {
@@ -23,6 +24,9 @@ abstract class HubSpotEntity extends Model {
             } else {
                 $data[$attribute] = $value;
             }
+        }
+        if ($filterNull) {
+            $data = array_filter($data);
         }
         return $data;
     }
