@@ -115,14 +115,17 @@ class HubSpotToolbox extends Plugin
             });
 
             Event::on(Order::class, Order::EVENT_AFTER_SAVE, function (ModelEvent $e) {
-//                EcommerceListener::handleOrderSaved($e);
+                EcommerceListener::handleOrderSaved($e);
             });
         });
 
-        Craft::$app->view->hook('cp.commerce.order.edit.details', function(&$context) {
+        Craft::$app->view->hook('cp.commerce.order.edit.details', function (&$context) {
             /** @var Order $order */
             $order = $context['order'];
             $syncStatus = $this->ecommSync->checkObjectSyncStatus($order, EcommerceDeal::class);
+//            $lineitem = $order->getLineItems()[0];
+//            $syncStatus = $this->ecommSync->checkObjectSyncStatus($lineitem, EcommerceLineItem::class);
+//            Craft::dd($syncStatus);
             return Craft::$app->view->renderTemplate('hubspot-toolbox/_ecommerce/_partials/edit-order-sync-status', [
                 'order' => $context['order'],
                 'syncStatus' => $syncStatus
