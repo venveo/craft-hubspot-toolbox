@@ -6,6 +6,7 @@
 
 namespace venveo\hubspottoolbox\entities\ecommerce;
 
+use craft\helpers\DateTimeHelper;
 use venveo\hubspottoolbox\entities\HubSpotEntity;
 
 /**
@@ -17,8 +18,14 @@ class ExternalObjectStatus extends HubSpotEntity
     public string $objectType;
     public string $externalObjectId;
     public string $hubspotId;
-    public string $lastProcessedAt;
+    public $lastProcessedAt;
     public array $errors;
+
+    public function init()
+    {
+        $this->lastProcessedAt = DateTimeHelper::toDateTime(round($this->lastProcessedAt / 1000));
+        parent::init();
+    }
 
     protected function defineRules(): array
     {
