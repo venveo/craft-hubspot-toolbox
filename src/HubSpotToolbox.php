@@ -21,10 +21,12 @@ use craft\services\Plugins;
 use craft\web\UrlManager;
 use venveo\hubspottoolbox\listeners\EcommerceListener;
 use venveo\hubspottoolbox\models\Settings;
+use venveo\hubspottoolbox\propertymappers\EcommerceDeal;
 use venveo\hubspottoolbox\services\FeaturesService;
 use venveo\hubspottoolbox\services\hubspot\EcommDealsService;
 use venveo\hubspottoolbox\services\hubspot\EcommService;
 use venveo\hubspottoolbox\services\hubspot\EcommSettingsService;
+use venveo\hubspottoolbox\services\hubspot\EcommSyncService;
 use venveo\hubspottoolbox\services\hubspot\PropertiesService;
 use venveo\hubspottoolbox\services\hubspot\PropertyMappingsService;
 use venveo\hubspottoolbox\services\OauthService;
@@ -38,6 +40,7 @@ use yii\base\Event;
  * @property  OauthService $oauth
  * @property  FeaturesService $features
  * @property  EcommService $ecomm
+ * @property  EcommSyncService $ecommSync
  * @property  EcommDealsService $ecommDeals
  * @property  EcommSettingsService $ecommSettings
  * @property  PropertiesService $properties
@@ -70,6 +73,7 @@ class HubSpotToolbox extends Plugin
         $this->setComponents([
             'ecomm' => EcommService::class,
             'ecommSettings' => EcommSettingsService::class,
+            'ecommSync' => EcommSyncService::class,
             'ecommDeals' => EcommDealsService::class,
             'oauth' => OauthService::class,
             'features' => FeaturesService::class,
@@ -114,6 +118,17 @@ class HubSpotToolbox extends Plugin
 //                EcommerceListener::handleOrderSaved($e);
             });
         });
+
+        Craft::$app->view->hook('cp.commerce.order.edit.details', function(&$context) {
+            /** @var Order $order */
+            $order = $context['order'];
+            $syncStatus = $this->ecommSync->checkObjectSyncStatus($order, EcommerceDeal::class);
+            return Craft::$app->view->renderTemplate('hubspot-toolbox/_ecommerce/_partials/edit-order-sync-status', [
+                'order' => $context['order'],
+                'syncStatus' => $syncStatus
+            ]);
+        });
+
 
 //        Event::on(CraftVariable::class, CraftVariable::EVENT_INIT, function (Event $event) {
 //            $variable = $event->sender;
