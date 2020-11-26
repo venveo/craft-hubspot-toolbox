@@ -30,7 +30,7 @@ class EcommerceDeal extends MultiTypePropertyMapper implements PreviewableProper
 
     public function getTemplateParams($source): array
     {
-        $order = Order::findOne($source);
+       $order = static::normalizeSource($source);
         return [
             'order' => $order
         ];
@@ -83,7 +83,7 @@ class EcommerceDeal extends MultiTypePropertyMapper implements PreviewableProper
             return true;
         }
 
-        $order = Order::findOne($source);
+        $order = static::normalizeSource($source);
 
         $edge = Commerce::getInstance()->getCarts()->getActiveCartEdgeDuration();
         $inactiveCutoff = new \DateTime($edge);
@@ -113,9 +113,22 @@ class EcommerceDeal extends MultiTypePropertyMapper implements PreviewableProper
      */
     public static function getExternalObjectId($source)
     {
+        $source = static::normalizeSource($source);
+        return $source->uid;
+    }
+
+    /**
+     * @param $source
+     * @return Order|null
+     */
+    public static function normalizeSource($source)
+    {
         if ($source instanceof Order) {
-            return $source->uid;
+            return $source;
         }
-        return Order::findOne($source)->uid;
+        if (is_numeric($source)) {
+            return Commerce::getInstance()->orders->getOrderById($source);
+        }
+        return null;
     }
 }

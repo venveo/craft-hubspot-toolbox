@@ -21,7 +21,7 @@ class PropertyMapperPipeline extends Component {
             }
 
             if (!$externalIdentifier) {
-                $externalIdentifier = $propertyMapper->getExternalObjectId($input);
+                $externalIdentifier = $propertyMapper::getExternalObjectId($input);
             }
 
             foreach($propertyMapper->getPropertyMappings() as $mapping) {

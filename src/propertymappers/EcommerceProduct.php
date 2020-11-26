@@ -36,9 +36,9 @@ class EcommerceProduct extends MultiTypePropertyMapper implements PreviewablePro
 
     public function getTemplateParams($source): array
     {
-        $variant = Variant::findOne($source);
+        $source = static::normalizeSource($source);
         return [
-            'variant' => $variant
+            'variant' => $source
         ];
     }
 
@@ -84,10 +84,22 @@ class EcommerceProduct extends MultiTypePropertyMapper implements PreviewablePro
      */
     public static function getExternalObjectId($source)
     {
-        if ($source instanceof Variant) {
-            return $source->uid;
-        }
-        $variant = Variant::findOne($source);
+        $variant = static::normalizeSource($source);
         return $variant->uid;
+    }
+
+    /**
+     * @param $source
+     * @return Variant|null
+     */
+    public static function normalizeSource($source)
+    {
+        if ($source instanceof Variant) {
+            return $source;
+        }
+        if (is_numeric($source)) {
+            return Variant::findOne($source);
+        }
+        return null;
     }
 }

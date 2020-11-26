@@ -34,7 +34,7 @@ class EcommerceLineItem extends PropertyMapper implements PreviewablePropertyMap
 
     public function getTemplateParams($source): array
     {
-        $lineitem = Plugin::getInstance()->getLineItems()->getLineItemById($source);
+        $lineitem = static::normalizeSource($source);
         return [
             'lineitem' => $lineitem
         ];
@@ -64,10 +64,22 @@ class EcommerceLineItem extends PropertyMapper implements PreviewablePropertyMap
      */
     public static function getExternalObjectId($source)
     {
+        $source = static::normalizeSource($source);
+        return $source->id;
+    }
+
+    /**
+     * @param $source
+     * @return LineItem|null
+     */
+    public static function normalizeSource($source)
+    {
         if ($source instanceof LineItem) {
-            return $source->id;
+            return $source;
         }
-        $lineitem = Plugin::getInstance()->getLineItems()->getLineItemById($source);
-        return $lineitem->id;
+        if (is_numeric($source)) {
+            return Plugin::getInstance()->getLineItems()->getLineItemById($source);
+        }
+        return null;
     }
 }

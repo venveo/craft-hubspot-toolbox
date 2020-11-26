@@ -109,6 +109,15 @@ interface PropertyMapperInterface extends \ArrayAccess, Arrayable, \IteratorAggr
     public static function getExternalObjectId($source);
 
     /**
+     * Input sources can be a variety of types. This function should handle those variations so source consumers don't
+     * have to.
+     *
+     * @param $source
+     * @return mixed
+     */
+    public static function normalizeSource($source);
+
+    /**
      * Returns whether the mapper can be applied to a source input
      *
      * @param $source

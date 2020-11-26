@@ -143,6 +143,14 @@ abstract class PropertyMapper extends Component implements PropertyMapperInterfa
     /**
      * @inheritdoc
      */
+    public static function normalizeSource($source)
+    {
+        return $source;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function canBeAppliedToSource($source): bool
     {
         return true;
