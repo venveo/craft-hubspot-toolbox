@@ -17,7 +17,10 @@ class ExternalObjectStatus extends HubSpotEntity
     public string $storeId;
     public string $objectType;
     public string $externalObjectId;
-    public string $hubspotId;
+    /**
+     * @var string
+     */
+    public $hubspotId;
     public $lastProcessedAt;
     public array $errors;
 
