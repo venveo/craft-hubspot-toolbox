@@ -107,8 +107,15 @@ class EcommerceDeal extends MultiTypePropertyMapper implements PreviewableProper
         return false;
     }
 
+    /**
+     * @param int|Order $source
+     * @return string
+     */
     public static function getExternalObjectId($source)
     {
+        if ($source instanceof Order) {
+            return $source->uid;
+        }
         return Order::findOne($source)->uid;
     }
 }

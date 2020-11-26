@@ -7,6 +7,7 @@
 namespace venveo\hubspottoolbox\propertymappers;
 
 use craft\commerce\elements\Order;
+use craft\commerce\models\LineItem;
 use craft\commerce\Plugin;
 use venveo\hubspottoolbox\enums\HubSpotObjectType;
 use venveo\hubspottoolbox\models\HubSpotObjectMapping;
@@ -57,9 +58,15 @@ class EcommerceLineItem extends PropertyMapper implements PreviewablePropertyMap
         return $mappings;
     }
 
-
+    /**
+     * @param int|LineItem $source
+     * @return int|mixed|null
+     */
     public static function getExternalObjectId($source)
     {
+        if ($source instanceof LineItem) {
+            return $source->id;
+        }
         $lineitem = Plugin::getInstance()->getLineItems()->getLineItemById($source);
         return $lineitem->id;
     }
