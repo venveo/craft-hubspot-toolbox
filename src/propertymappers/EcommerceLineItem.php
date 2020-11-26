@@ -53,7 +53,7 @@ class EcommerceLineItem extends PropertyMapper implements PreviewablePropertyMap
         $mappings[] = new HubSpotObjectMapping(['property' => 'quantity', 'template' => '{lineitem.qty}']);
         $mappings[] = new HubSpotObjectMapping(['property' => 'name', 'template' => '{lineitem.purchasable.title}']);
         $mappings[] = new HubSpotObjectMapping(['property' => 'description', 'template' => '{lineitem.description}']);
-        $mappings[] = new HubSpotObjectMapping(['property' => 'discount', 'template' => '{lineitem.discount}']);
+        $mappings[] = new HubSpotObjectMapping(['property' => 'discount', 'template' => '{lineitem.discount * -1}']);
         $mappings[] = new HubSpotObjectMapping(['property' => 'tax', 'template' => '{lineitem.tax}']);
         return $mappings;
     }

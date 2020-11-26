@@ -26,7 +26,6 @@ class ExternalObjectStatus extends HubSpotEntity
 
     public function init()
     {
-        $this->lastProcessedAt = DateTimeHelper::toDateTime(round($this->lastProcessedAt / 1000));
         parent::init();
     }
 
@@ -35,5 +34,10 @@ class ExternalObjectStatus extends HubSpotEntity
         $rules = parent::defineRules();
         $rules[] = [['storeId', 'objectType', 'externalObjectId', 'lastProcessedAt'], 'required'];
         return $rules;
+    }
+
+    public function microtimeAttributes()
+    {
+        return ['lastProcessedAt'];
     }
 }
